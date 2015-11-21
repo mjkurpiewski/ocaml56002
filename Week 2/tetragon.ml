@@ -21,54 +21,52 @@ let apoorlyformedtetragon : tetragon = (lup, rup, llp, bad);;
 Actual code
 *)
 
-let lup (lup, _, _, _) = lup
-let rup (_, rup, _, _) = rup
-let llp (_, _, llp, _) = llp
-let rlp (_, _, _, rlp) = rlp
-
 let xcoord (x, _) = x;;
 let ycoord (_, y) = y;;
 
-let rotate_point (to_rotate : point2d) : point2d =
-  (ycoord to_rotate, -(xcoord to_rotate));;
+let rotate_point (x, y) : point2d =
+  (y, -x);;
 
-(* lup, rup, llp, rlp*)
-let rec reorder p1 p2 p3 p4 : tetragon =
+let rec reorder (p1, p2, p3, p4) : tetragon =
+  let lup (lup, _, _, _) = lup in
+  let rup (_, rup, _, _) = rup in
+  let llp (_, _, llp, _) = llp in
+  let rlp (_, _, _, rlp) = rlp in
   let reordered:tetragon = (p1, p2, p3, p4) in
   if xcoord (lup reordered) > xcoord (rup reordered) then
-    reorder p2 p1 p3 p4
+    reorder (p2, p1, p3, p4)
   else
   if xcoord (llp reordered) > xcoord (rlp reordered) then
-    reorder p1 p2 p4 p3
+    reorder (p1, p2, p4, p3)
   else
   if ycoord (lup reordered) < ycoord (llp reordered) then
-    reorder p3 p2 p1 p4
+    reorder (p3, p2, p1, p4)
   else
   if ycoord (rup reordered) < ycoord (rlp reordered) then
-    reorder p1 p4 p3 p2
+    reorder (p1, p4, p3, p2)
   else
     reordered;;
 
-let pairwise_distinct (target : tetragon) : bool =
-  if lup target <> rup target &&
-     llp target <> rlp target &&
-     lup target <> llp target &&
-     rup target <> rlp target then
+let pairwise_distinct (lup, rup, llp, rlp) : bool =
+  if lup <> rup &&
+     llp <> rlp &&
+     lup <> llp &&
+     rup <> rlp then
   true
 else
   false;;
 
-let wellformed (target : tetragon) : bool =
-  if xcoord (lup target) <= xcoord (rup target) &&
-     xcoord (llp target) <= xcoord (rlp target) &&
-     ycoord (lup target) >= ycoord (llp target) &&
-     ycoord (rup target) >= ycoord (rlp target) then
+let wellformed (lup, rup, llp, rlp) : bool =
+  if xcoord lup < xcoord rup &&
+     xcoord llp < xcoord rlp &&
+     ycoord lup > ycoord llp &&
+     ycoord rup > ycoord rlp then
     true
   else
     false;;
 
-let rotate_tetragon (to_rotate : tetragon) : tetragon =
-  reorder (rotate_point (lup to_rotate))
-    (rotate_point (rup to_rotate))
-    (rotate_point (llp to_rotate))
-    (rotate_point (rlp to_rotate));;
+let rotate_tetragon (lup, rup, llp, rlp) : tetragon =
+  reorder ((rotate_point lup),
+           (rotate_point rup),
+           (rotate_point llp),
+           (rotate_point rlp));;
