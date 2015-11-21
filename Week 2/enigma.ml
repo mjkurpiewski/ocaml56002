@@ -12,22 +12,19 @@ let is_valid_answer (grand_father_age, grand_son_age) : bool =
   else
     false;;
 
-let rec find (max_grand_father_age, min_grand_son_age) : (int * int) =
-  let rec range n m =
+let rec range n m =
     if n > m then
       []
     else
-      n :: (range (n + 1) m) in
-  let defined_range =
-    range 1 max_grand_father_age in
-  let grand_father_candidates =
-    List.map (fun x -> if x mod 4 = 0 && (exchange x) mod 3 = 0 then x else 0) defined_range in
-  let filtered_candidates =
-    List.filter (fun x -> x > 0) grand_father_candidates in
+      n :: (range (n + 1) m)
 
+let rec find_helper (gf_age, gs_age) : (int * int) =
+  if is_valid_answer gf_age gs_age
+
+let find (max_grand_father_age, min_grand_son_age) : (int * int) =
+  if is_valid_answer 
 
 (*
-let thislist =
-  List .map (Core.Std.List.range 0 100)
-    (fun x -> if x mod 4 = 0 && (exchange x) mod 3 = 0 then x else 0)
+    List.map (fun x -> if x mod 4 = 0 && (exchange x) mod 3 = 0 then x else 0) defined_range in
+    List.filter (fun x -> x > 0) grand_father_candidates in
 *)
