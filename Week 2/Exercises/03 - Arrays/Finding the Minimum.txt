@@ -9,3 +9,13 @@ Consider a non empty array of integers a.
 Do you think these functions work well on large arrays ?
 
 3) Define a variable it_scales and set it to "yes" or "no".
+
+;; Boilerplate
+let min a =
+  "Replace this string with your implementation." ;;
+
+let min_index a =
+  "Replace this string with your implementation." ;;
+
+let it_scales =
+  "Replace this string with your answer." ;;

@@ -16,3 +16,20 @@ THE GIVEN PRELUDE
 type point  = { x : float; y : float; z : float }
 type dpoint = { dx : float; dy : float; dz : float }
 type physical_object = { position : point; velocity : dpoint }
+
+DEFINITIONS
+
+let move p dp =
+  "Replace this string with your implementation." ;;
+
+let next obj =
+  "Replace this string with your implementation." ;;
+
+let will_collide_soon p1 p2 =
+  "Replace this string with your implementation." ;;
+
+Helpful information!!!
+
+Two spheres intersect if the distance between their two centres is smaller than the sum of the radius's. The distance between two points (x,y,z) and (x',y',z') is:
+
+sqrt((x-x')² + (y-y')² + (z-z')²)

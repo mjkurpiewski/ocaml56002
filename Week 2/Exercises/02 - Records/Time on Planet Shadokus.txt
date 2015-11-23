@@ -27,3 +27,19 @@ type date =
 let the_origin_of_time =
   { year = 1; month = 1; day = 1;
     hour = 0; minute = 0 }
+
+;; Boilerplate
+let wellformed date =
+  "Replace this string with your implementation." ;;
+
+let next date =
+  "Replace this string with your implementation." ;;
+
+let of_int minutes =
+  "Replace this string with your implementation." ;;
+
+next {year = 3; month = 4; day = 3; hour = 2; minute = 1}
+we normalize_time on {year = 3; month = 4; day = 3; hour = 2; minute = 2}
+minute > 1 so we get
+{year = 3; month = 4; day = 3; hour = 3; minute = 0}
+Wrong value: {year = 3; month = 4; day = 4; hour = 0; minute = 1}
