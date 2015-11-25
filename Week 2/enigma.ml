@@ -2,7 +2,7 @@ let exchange (x : int) : int =
   if (x >= 10) && (x <= 99) then
     let intstring = string_of_int x in
     let revstring = Char.escaped (String.get intstring 1) ^ Char.escaped (String.get intstring 0) in
-    int_of_string revstring
+     int_of_string revstring
   else
     -1;;
 
