@@ -20,9 +20,7 @@ let split l =
   listbuilder l ([], []) 0;;
 
 let dequeue (front, back) =
-
-(* let dequeue q = *)
-(*   match q with *)
-(*   | ([], back) -> (List.hd (List.rev back), split back) *)
-(*   | (front, []) -> (List.hd front, split (List.rev (List.tl front))) *)
-(*   | (front, back) -> (List.hd front, split (back @ List.rev (List.tl front)));; *)
+  match (front, back) with
+  | ([], back) -> (List.hd (List.rev back), ((List.tl (List.rev back)), []))
+  | (front, []) -> (List.hd front, split (List.rev (List.tl front)))
+  | (front, back) -> (List.hd front, split (back @ (List.rev (List.tl front))));;
