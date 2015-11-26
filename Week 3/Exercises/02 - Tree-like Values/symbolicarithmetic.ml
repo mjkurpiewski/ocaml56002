@@ -22,7 +22,16 @@ let factorize e =
   | e -> e;;
 
 let expand e =
-  "Replace this string with your implementation." ;;
+  match e with
+  | EMul (a, EAdd (b, c)) -> EAdd (EMul (a, b), EMul (a, c))
+  | e -> e;;
 
 let simplify e =
-  "Replace this string with your implementation." ;;
+  match e with
+  | EMul ((EInt 0), _) -> (EInt 0)
+  | EMul (_, (EInt 0)) -> (EInt 0)
+  | EMul ((EInt 1), rest) -> rest
+  | EMul (rest, (EInt 1)) -> rest
+  | EAdd ((EInt 0), rest) -> rest
+  | EAdd (rest, (EInt 0)) -> rest
+  | e -> e;;
