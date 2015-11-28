@@ -10,9 +10,11 @@ Abstract syntax trees are a convenient way to represent a syntactic expression i
  3. if lhs and rhs are arithmetic expressions then lhs * rhs is an arithmetic expression. 
 
 Such an expression can be represented by a value of type exp as defined in the given prelude (as well as the definition of 1 + 2 * 3 as an example). 
- 
+
+DONE
 1. Write the expression 2 * 2 + 3 * 3 in a variable my_example. 
- 
+
+DONE
 2. Write a function eval : exp -> int that computes the value of an arithmetic expression. The evaluation rules are: 
   1. If the expression is an integer x, the evaluation is x. 
   2. If the expression is lhs + rhs and lhs evaluates to x and rhs evaluates to y, then the evaluation is x + y. 
