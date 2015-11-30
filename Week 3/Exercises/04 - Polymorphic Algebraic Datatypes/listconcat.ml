@@ -35,13 +35,6 @@ let append l1 l2 =
 (*   | CSingle x -> Some x *)
 (*   | CEmpty -> None;; *)
 
-let hd l =
-  let listform = to_list l in
-  if listform = [] then
-    None
-  else
-    Some (List.nth listform 0);;
-
 (* let rec tl l = *)
 (*   match l with *)
 (*   | CEmpty -> None *)
@@ -49,3 +42,17 @@ let hd l =
 (*   | CApp (x, y) -> *)
 (*     (match (x, y) with *)
 (*      | ());; *)
+
+let hd l =
+  let listform = to_list l in
+  if listform = [] then
+    None
+  else
+    Some (List.nth listform 0);;
+
+let tl l =
+  let listform = to_list l in
+  match listform with
+  | [] -> None
+  | x :: [] -> Some CEmpty
+  | x :: y -> Some (of_list y);;

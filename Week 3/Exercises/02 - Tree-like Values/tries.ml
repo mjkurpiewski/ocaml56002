@@ -65,7 +65,6 @@ let lookup trie w =
   let rec lookup_helper trie counter =
     match trie with
     | trie when trie = empty -> None
-    | Trie (opt, []) -> opt
     | Trie (opt, rest) ->
       if counter = String.length w then
         opt
@@ -77,23 +76,23 @@ let lookup trie w =
   in
   lookup_helper trie 0;;
 
-let insert trie (w : string) (v : int) =
-  let wlen = String.length w in
+(* let insert trie (w : string) (v : int) = *)
+(*   let wlen = String.length w in *)
 
-  let rec insert_helper trie counter =
-    match trie with
-      | Trie (opt, []) ->
-        if counter = (wlen - 1) then
-          insert_helper (Trie (Some v, update_children [] w.[counter] empty)) counter
-        else
-          insert_helper (Trie (opt, update_children [] w.[counter] empty)) counter
-      | Trie (opt, rest) ->
-        let exists = children_from_char rest w.[counter] in
-        match exists with
-        | None -> insert_helper (Trie (opt, update_children rest w.[counter] empty)) counter
-        | Some t -> insert_helper t (counter + 1)
-  in
-  if lookup trie w = Some v then
-    trie
-  else
-    insert_helper trie 0;;
+(*   let rec insert_helper trie counter = *)
+(*     match trie with *)
+(*       | Trie (opt, []) -> *)
+(*         if counter = (wlen - 1) then *)
+(*           insert_helper (Trie (Some v, update_children [] w.[counter] empty)) counter *)
+(*         else *)
+(*           insert_helper (Trie (opt, update_children [] w.[counter] empty)) counter *)
+(*       | Trie (opt, rest) -> *)
+(*         let exists = children_from_char rest w.[counter] in *)
+(*         match exists with *)
+(*         | None -> insert_helper (Trie (opt, update_children rest w.[counter] empty)) counter *)
+(*         | Some t -> insert_helper t (counter + 1) *)
+(*   in *)
+(*   if lookup trie w = Some v then *)
+(*     trie *)
+(*   else *)
+(*     insert_helper trie 0;; *)
