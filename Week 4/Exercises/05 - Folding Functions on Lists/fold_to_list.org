@@ -1,0 +1,21 @@
+* Using fold to produce lists
+** DONE filter : ('a -> bool) -> 'a list -> 'a list
+CLOSED: [2015-12-01 Tue 18:24]
+This function takes a predicate function (p : bool) and an 'a list and returns
+an 'a list for which the p 'a.[x] = true over the length of the list.
+*** let filter p l =
+** DONE partition : ('a -> bool) -> 'a list -> 'a list * 'a list
+CLOSED: [2015-12-01 Tue 18:39]
+Using List.fold_right, define a function that takes a predicate function
+(p : bool) and (l : 'a list) as arguments and returns a pair of 'a lists
+in the form (lpos, lneg) where lpos is the list of all elements of l that
+satisfy p, where lneg is the list of elements that do not satisfy p.
+*** let partition p l =
+** DONE sort : 'a list -> 'a list
+CLOSED: [2015-12-01 Tue 19:02]
+Using partition from before, implement Quicksort with the following rules:
+*** [] is trivially sorted
+*** if l = h :: r
+**** Sorted elements of r <= h
+**** h (head is pivot)
+**** Sorted elements of r > h

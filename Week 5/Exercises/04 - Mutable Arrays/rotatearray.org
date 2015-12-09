@@ -1,0 +1,20 @@
+* Rotating the Contents of an Array
+In this exercise, we will improve the code for rotating arrays, modifying
+the existing rotate function and defining a function 'rotate_by' which allows
+you to rotate by n positions.
+** DONE let rotate a =
+CLOSED: [2015-12-08 Tue 23:59]
+let n = Array.length a in
+let v = a.(0) in
+for i = 0 to n - 2 do
+  a.(i) <- a.(i+1)
+done;
+a.(n - 1) <- v;;
+*** Perfect this!
+** DONE rotate_by : 'a array -> int -> unit
+CLOSED: [2015-12-09 Wed 14:01]
+This function adds an additional argument of (n : int) which rotates the
+argument (a : 'a array) n places. For example:
+rotate_by [|1;2;3;4|] 3 = [|4;1;2;3|]
+*** let rotate_by a n =
+

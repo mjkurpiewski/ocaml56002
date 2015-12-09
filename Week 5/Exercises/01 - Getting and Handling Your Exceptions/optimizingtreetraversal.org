@@ -1,0 +1,42 @@
+* Optimising a Tree Traversal Using Exceptions
+In a previous exercise, we defined a binary tree as shown in the prelude below.
+We then defined a function height and a function balanced that would check whether
+or not the tree is balanced. However, this is not terribly efficent, and we can
+improve its efficiency by using exceptions
+** TODO Modify 'height' and  'balanced'
+'height' and 'balanced' will now return the number of leaf visits
+so that encountering Empty counts as 1 and Nodes are uncounted.
+When modifying 'balanced', include the results of all the calls to 'height'
+in the total sum. We may need to add 'if' statements.
+The new function type signatures should be:
+*** height : 'a bt -> int * int
+*** balanced : 'a bt -> bool * int
+** TODO Exception 'Unbalanced of int'
+We use this exception within a function defined as
+*** bal_height : 'a bt -> int * int
+Returns the height of a balanced tree with the tuple consisting of
+(tree_height, tree_height) for a balanced tree. It will raise
+'Unbalanced n' if the input tree is unbalanced as soon as possible,
+i.e. as soon as the first pair of subtrees of different heights are encountered.
+The parameter n in the exception 'Unbalanced n' is the number of leaves visited
+up until the exception was raised.
+We may need a recursive aux function that contains visits already performed
+during the traversal.
+** TODO balanced_fast : 'a bt -> bool * int
+Uses bal_height and returns a tuple containing a boolean indicating whether or
+not the 'a bt is balanced as well as the number of visits registered.
+
+* Prelude
+** type 'a bt =
+| Empty
+| Node of 'a bt * 'a * 'a bt;;
+** exception Unbalanced of int;;
+
+* Given Code
+** let rec height = function
+| Empty -> 0
+| Node (t, _, t') -> 1 + (max (height t) (height t'));;
+** let rec balanced = function
+| Empty -> true
+| Node (t, _, t') ->
+|  (balanced t) && (balanced t') && height t = height t';;

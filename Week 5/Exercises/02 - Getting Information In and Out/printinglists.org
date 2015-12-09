@@ -1,0 +1,18 @@
+* Printing Lists
+** DONE print_int_list : int list -> unit
+CLOSED: [2015-12-07 Mon 18:17]
+Takes a list of integers as output and prints all the elements of the list,
+each on its own line.
+*** let rec print_int_list l =
+** DONE print_every_other : int -> int list -> unit
+CLOSED: [2015-12-07 Mon 18:53]
+print_every_other takes a value k of type int and prints elements of the list
+that are in positions multiple of k, each on its own line. 
+Note: first element of a list is at position 0, not 1.
+*** let print_every_other k l =
+** DONE print_list : ('a -> unit) -> 'a list -> unit
+CLOSED: [2015-12-07 Mon 18:58]
+print_list takes a printer for values of some type 'a and a list of values of 
+type 'a as input. print_list then prints each element of the list on its own
+line.
+*** let rec print_list print l =

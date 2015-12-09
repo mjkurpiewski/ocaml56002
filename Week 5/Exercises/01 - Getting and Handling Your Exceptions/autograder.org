@@ -1,0 +1,43 @@
+* Unraveling the Automatic Grader
+** DONE exec: ('a -> 'b) -> 'a -> 'b result 
+CLOSED: [2015-12-07 Mon 17:18]
+This uses the type 'a result defined in the prelude.
+Exec calls the given function on a given argument and returns "Ok" if7
+execution succeeded, otherwise it returns "Error" with the exception 
+that was raised.
+*** let exec f x =
+** DONE compare: 'a result -> 'a result -> ('a -> string) -> message
+CLOSED: [2015-12-07 Mon 17:38]
+This function takes the user function result and then the result of the
+reference function. It also takes a printer function of type ('a -> string)
+which displays the result. 
+*** Some sample cases
+("got correct value 13", Successful)
+("got unexpected value 13", Failed)
+("got correct exception Exit", Successful)
+("got unexpected exception Exit", Failed)
+*** let compare user reference to_string =
+We may use the function "exn_to_string" for to_string
+** DONE test: ('a -> 'b) -> ('a -> 'b) -> (unit -> 'a) -> ('b -> string) -> report
+CLOSED: [2015-12-07 Mon 18:08]
+For a given type 'a, a random sampler has type of (unit -> 'a), an imperiatve
+function that returns a new value of type 'a every time it is given a unit.
+This function will perform 10 tests, calling the sampler each time, and returns
+the list of messages. 
+
+For each sample, we 'exec' the user function, THEN we 'exec' the reference function,
+THEN we 'compare' the 'results' from each call of 'exec'. It then returns the 'report'
+consisting of the 10 'results' of 'compare'.
+
+The solution must respect the constraint that the first call to the sampler 
+corresponds to the first message in the 'report' list, second to second, etc.
+
+Since the sampler is imperiatve, we may need to use 'let' ... 'in' to force the
+evaluation.
+*** let test user reference sample to_string = 
+* The Given Prelude
+type report = message list
+and message = string * status
+and status = Successful | Failed
+
+type 'a result = Ok of 'a | Error of exn

@@ -1,0 +1,60 @@
+* Displaying a File System Hierarchy
+** DONE print_path : string list -> unit
+CLOSED: [2015-12-07 Mon 21:50]
+Prints the relative path (argument of a Symlink) and pretty prints it as 
+shown in the example, using '/' as a separator.
+*** let rec print_path path =
+** DONE print_file : int -> string -> unit
+CLOSED: [2015-12-07 Mon 21:56]
+The depth of a file in the 'filesystem' (# of nested folders that are its
+ancestors) is represented by a sequence of vertical lines. print_file will
+print a file name, with the given number of "| " in front of it.
+*** let rec print_file lvl name =
+** DONE print_symlink : int -> string -> string list -> unit
+CLOSED: [2015-12-07 Mon 22:00]
+print_symlink will print the link name, with the given number of "| " in front,
+followed by " -> " and the relative path.
+*** let rec print_symlink lvl name path =
+** DONE print_dir : int -> string -> unit
+CLOSED: [2015-12-07 Mon 22:06]
+print_dir will print the directory name with the given number of "| " in front,
+with a prepended '/'.
+*** let rec print_dir lvl name =
+** DONE print_filesystem : filesystem -> unit
+CLOSED: [2015-12-07 Mon 23:22]
+print_filesystem will traverse the filesystem, producing the same display as in
+the example. This will likely require an auxiliary, recursive function that will
+use the previous printer functions.
+*** let print_filesystem root =
+*** let rec print_filesystem lvl items = ... in
+*** print_filesystem 0 root;;
+** DONE resolve : string list -> string list -> string list
+CLOSED: [2015-12-08 Tue 14:16]
+resolve will take as parameters the following:
+- The full path from the root to a symlink, including it's name. For instance,
+  ["indexes"; "photos_april.html"]
+- The relative path for the symlink. For instance,
+  [".."; "photos"; "april"; "index.html"]
+The function will return the full path from the root to the target of the
+symlink. In this case, we should get
+- [ "photos" ; "april" ; "index.html" ]
+*** let rec resolve sym path =
+*** let rec resolve acc path = ... in
+*** resolve (List.tl (List.rev sym)) path;;
+** DONE file_exists : filesystem -> string list -> bool
+CLOSED: [2015-12-08 Tue 14:53]
+file_exists returns a boolean depending on whether or not a file exists in the 
+given filesystem. The path is the full, absolute path to the file, and the
+target must be a 'File', not a 'Dir' or 'Symlink'.
+*** let rec file_exists root path =
+** DONE Update print_filesystem : filesystem -> unit
+CLOSED: [2015-12-08 Tue 16:33]
+If a symlink cannot be resolved to an existing file, we replace the printed
+relative path with "INVALID".
+* The Given Prelude
+type filesystem =
+  (string * node) list
+and node =
+  | File
+  | Dir of filesystem
+  | Symlink of string list

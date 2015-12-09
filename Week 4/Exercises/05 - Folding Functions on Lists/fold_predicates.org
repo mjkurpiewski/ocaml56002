@@ -1,0 +1,26 @@
+* Using Fold to Check Predicates
+** DONE for_all : ('a -> bool) -> 'a list -> bool
+CLOSED: [2015-12-01 Tue 19:47]
+This function takes an argument of 'a list l and a predicate function of type
+('a -> bool) called p. for_all returns true if all elements of l satisfy p.
+Otherwise, it returns false.
+*** let for_all p l =
+** DONE exists : ('a -> bool) -> 'a list -> bool
+CLOSED: [2015-12-03 Thu 14:48]
+This function takes an argument of 'a list l and a predicate function of type
+('a -> bool) called p. exists returns true if at least one element of l
+satisfies p. Otherwise, it returns false.
+*** let exists p l =
+** DONE sorted : ('a -> 'a -> int) -> 'a list -> bool
+CLOSED: [2015-12-03 Thu 15:40]
+This function uses List.fold_left to check that the input list of elements
+(l : 'a list) is sorted with respect to an ordering function
+*** (cmp : 'a -> 'a -> int).
+cmp returns n >= 1 if 'a1 > 'a2
+cmp returns n <= -1 if 'a1 < 'a2
+cmp returns 0 otherwise.
+*** for fold_left
+Use type 'a option as the accumulator; at each iteration of fold_left, if
+the list is sorted, the accumulator is Some v where v is some 'a AND the previous
+element or None otherwise.
+*** Empty list [] is trivially sorted

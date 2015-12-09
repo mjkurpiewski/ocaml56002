@@ -1,0 +1,60 @@
+* A Small Arithmetic Interpreter
+In this exercise, we will write a small program that computes some operations on
+integers. We will use a small datatype operation that describes all the
+operations to perform to compute the result.
+
+For example, suppose we want to do the following computation:
+
+mul (add 0 1) (mul 3 4)
+
+We can describe it as: Op ("mul", Op ("add", Value 0, Value 1), Op ("mul", Value 3, Value 4))
+
+The Op constructor takes as a first argument a string, which is the name of the
+function that is stored in an environment.
+
+We suppose there exists a variable initial_env that contains some predefined functions.
+
+** DONE lookup_function : string -> env -> (int -> int -> int)
+CLOSED: [2015-11-30 Mon 21:37]
+Returns the function associated with the string name in the environment.
+This value associated with the string is a function that takes two integers
+as arguments and returns an integer.
+If no function with the name exists in the environment, return:
+
+invalid_arg "lookup_function"
+*** let rec lookup_function n = function _ ->
+** DONE add_function : string -> (int -> int -> int) -> env -> env
+CLOSED: [2015-11-30 Mon 22:12]
+Given an environment, e : env, a function name, n : string, and a function,
+f : (int -> int -> int), returns a new environment containing the function
+f associated to the name n.
+*** let add_function name op env =
+** DONE my_env : env
+CLOSED: [2015-11-30 Mon 22:51]
+A variable that is the initial environment, plus a function associated to the
+name "min" that takes two integers and returns the lowest.
+*** No Pervasives.min, no let .. in. Suggest use of lambda exprs.
+** DONE compute : env -> operation -> int
+CLOSED: [2015-11-30 Mon 22:51]
+This function takes an environment and operation description and computes
+the expression in the context of the environment. This can return either a
+direct value or an operation that takes two computed values and a function
+from the environment.
+*** let rec compute env op =
+** DONE compute_eff : env -> operation -> int
+CLOSED: [2015-11-30 Mon 22:51]
+Suppose a function:
+id: 'a -> 'a ; therefore, id id is also of type 'a -> 'a
+Initial idea: lambda partially applies the environment, pattern match
+recursively on tuple to look up the operation in the closured environment. Might
+not be able to do this w/o let. Speculation, whatever.
+*** let rec compute_eff env = function _ ->
+*** You cannot use let
+
+* The Prelude
+** Operation Type
+type operation =
+    Op of string * operation * operation
+  | Value of int
+** Environment Type
+type env = (string * (int -> int -> int)) list

@@ -1,0 +1,54 @@
+* Producing Fine ASCII Art
+For this, we will display black and white images as text, where a black dot is
+printed as '#' and a white dot as ' '.
+
+Images will be functions that take (x : int) and (y : int) and returns a bool
+that indicates if the function is black or white at point (x, y).
+
+We see this in the 'image' type alias given in the prelude.
+
+** DONE display_image : int -> int -> image -> unit
+CLOSED: [2015-12-08 Tue 18:39]
+Takes the following as arguments: (width : int), (height : int), and
+(f_image : image), which takes as arguments (x : int), (y : int).
+
+Each line is a y value, the first being y = 0, the last being y = height.
+For each line, the first character is x = 0, the last being x = width.
+*** let display_image width height f_image =
+** DONE render : blend -> int -> int -> bool
+CLOSED: [2015-12-08 Tue 18:49]
+If we take two functions, 'f' and 'g', we have the following properties:
+- Image f -> (image of f)
+- And (Image f, Image g) -> Black where 'f' and 'g' are both black
+- Or (Image f, Image g) -> Black where 'f', 'g', or both are both black
+- Rem (Image f, Image g) -> Black where 'f' is black AND 'g' is white
+
+For a given (x : int), (y : int), returns the boolean color of the point
+with respect to the blended image.
+*** let rec render blend x y =
+** DONE display_blend : int -> int -> blend -> unit
+CLOSED: [2015-12-08 Tue 18:56]
+Takes as arguments (width : int), (height : int), and a blended image
+(blend : blend). Returns () and prints to stdout.
+*** let display_blend width height blend =
+* The given prelude
+** type image = int -> int -> bool;;
+** let all_white = fun x y -> false;;
+** let all_black = fun x y -> true;;
+** let checkers = fun x y -> y/2 mod 2 = x/2 mod 2;;
+** let square cx cy s = fun x y ->
+let minx = cx - s / 2 in
+let maxx = cx + s / 2 in
+let miny = cy - s / 2 in
+let maxy = cy + s / 2 in
+x >= minx && x <= maxx && y >= miny && y <= maxy;;
+** let disk cx cy r = fun x y ->
+let x' = x - cx in
+let y' = y - cy in 
+(x' * x' + y' * y') <= r * r;;
+** type blend =
+| Image of image       |
+| And of blend * blend |
+| Or of blend * blend  |
+| Rem of blend * b     |
+|                      |

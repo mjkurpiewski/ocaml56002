@@ -1,0 +1,19 @@
+* Using and Writing the Map Function
+** DONE wrap : 'a list -> 'a list list
+CLOSED: [2015-12-01 Tue 00:51]
+Transforms elements 'a of an input list l into singleton lists,
+all within a list.
+*** let wrap l =
+** DONE tree_map : ('a -> 'b) -> 'a tree -> 'b tree
+CLOSED: [2015-12-01 Tue 00:51]
+Such that tree_map f t yields a tree of the same structure as t, but
+all contents x replaced by f x.
+
+i.e. string_of_int : int -> string,
+tree_map string_of_int (t : int) = (t : string)
+*** let rec tree_map f = function _ ->
+
+* The Prelude
+type 'a tree =
+    Node of 'a tree * 'a * 'a tree
+  | Leaf of 'a;;

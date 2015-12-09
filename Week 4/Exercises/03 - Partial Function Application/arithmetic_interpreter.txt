@@ -1,0 +1,6 @@
+In this exercise, we will write a small program that computes some operations on
+integers. We will use a small datatype operation that describes all the
+operations to perform to compute the result.
+For example, suppose we want to do the following computation:
+
+mul (add 0 1) (mul 3 4)
