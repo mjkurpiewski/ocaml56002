@@ -1,0 +1,69 @@
+* Implementing Mutable Lists
+Using mutable record fields, we can create a list data structure with a type
+that has explicit pointers, which is defined by the type 'a xlist in the
+prelude.
+
+We write the empty list as:
+{ pointer = Nil }
+
+The singleton list that contains "1" is written as:
+{ pointer = List (1, { pointer = Nil }) }
+
+The list containing elements "1", "2", and "3" is written as:
+{ pointer =
+    List (1, { pointer =
+                 List (2, { pointer = 
+                             List (3, { pointer =
+                                          Nil }) }) }) }
+
+-or as-
+
+{ pointer = List (1, { pointer = List (2, { pointer = List (3, { pointer = Nil }) }) }) }
+* Functions
+** DONE head : 'a xlist -> 'a
+CLOSED: [2015-12-09 Wed 15:51]
+Returns the first element of the list if it exists, otherwise raises
+'Empty_xlist'. This is not a mutating operation.
+*** let head l =
+** DONE tail : 'a xlist -> 'a xlist 
+CLOSED: [2015-12-09 Wed 15:53]
+Returns the list, without the first element, should that list exist.
+Otherwise, raises 'Empty_xlist'. This is not a mutating operation.
+*** let tail l =
+** DONE add : 'a -> 'a xlist -> unit
+CLOSED: [2015-12-09 Wed 16:10]
+Modifies the list, in place, to add the element argument of type 'a to the
+front. This is a mutating operation.
+*** let add a l =
+** DONE chop : 'a xlist -> unit
+CLOSED: [2015-12-09 Wed 16:13]
+Removes the first element of the list, should it exist. Otherwise, raises
+'Empty_xlist'. This is a mutating operation.
+*** let chop l =
+** DONE append : 'a xlist -> 'a xlist -> unit
+CLOSED: [2015-12-09 Wed 16:28]
+A mutating + destructive operation which modifies the pointer at the end of
+the first list to point to the first element of the second list. 
+*** let rec append l l' =
+** DONE filter : ('a -> bool) -> 'a xlist -> unit
+CLOSED: [2015-12-09 Wed 16:53]
+A mutating + destructive operation which removes from the given list all
+elements that do NOT satisfy the predicate passed as parameter. For clarity,
+we hold the last true element in mind until we reach another true element and
+link the pointer, dropping any number of false elements between.
+*** let rec filter p l =
+
+* The given prelude
+type 'a xlist =
+  { mutable pointer : 'a cell }
+and 'a cell =
+  | Nil
+  | List of 'a * 'a xlist;;
+
+let nil () =
+  { pointer = Nil };;
+
+let cons elt rest = 
+  { pointer = List (elt, rest) };;
+
+exception Empty_xlist;;

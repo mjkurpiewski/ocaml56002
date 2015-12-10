@@ -1,0 +1,53 @@
+* Implementing a Stack with an Array
+We will encode imperative stacks of type integer using the type:
+type stack = int array;
+
+The first cell in the stack, cell '0', stores the number of items in the stack.
+Indices running from 1 to n will store the elements of the stack. The bottom
+element in the stack is located at index '1'.
+
+The stack's maximum capacity is defined as (Array.length stack) - 1.
+
+** [| 0 ; _ ; _ ; _ ; _ |]
+This is an empty stack with a capacity of 4.
+** [| 3 ; 1 ; 2 ; 3 ; _ |]
+This is a stack containing three elements, with a maximum capacity of
+four elements. The '3' at index 0 shows us that the stack contains '3' filled
+elements, and we know that '1' occupies the very bottom of the stack, with '2'
+in the middle and '3' at the top.
+
+* Functions
+** DONE create : int -> stack
+CLOSED: [2015-12-09 Wed 14:53]
+This function creates a new stack of the given maximum capacity.
+Of note, make sure to fill index 0 with '0' to denote the array's empty
+status.
+*** let create size =
+** DONE push : stack -> int -> unit
+CLOSED: [2015-12-09 Wed 15:15]
+This function adds an element to the stack by 'push'ing it on to the top.
+Should the stack be full, i.e. "if stack.(0) = (Array.length stack) - 1"
+we will raise an exception "Full".
+*** let push buf elt =
+** DONE append : stack -> int array -> unit
+CLOSED: [2015-12-09 Wed 15:22]
+'append' will add an array of integers as the top of the stack. Elements from the
+array that we append to the stack are added such that the last element of the
+array is pushed on to the stack by append first, with the first element of the
+array being pushed on to the stack last.
+
+If the stack becomes full while appending elements, we will raise the exception
+'Full' after appending as many elements as possible. This exception should be 
+propagated by the repeated application of 'push' to the stack.
+*** let append buff arr =
+** DONE pop : stack -> int
+CLOSED: [2015-12-09 Wed 15:27]
+'pop' will take the element at the top of the stack, remove it from the mutable
+stack, and then return that element. If the stack is empty, 'pop' will raise the
+exception 'Empty'.
+*** let pop buf =
+
+* The given prelude
+type stack = int array;;
+exception Full;;
+exception Empty;;

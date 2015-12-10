@@ -1,0 +1,30 @@
+* Simple Uses of References
+** DONE swap : 'a ref -> 'a ref -> unit
+CLOSED: [2015-12-09 Wed 17:08]
+This swaps the contents of two references.
+*** let swap ra rb =
+** DONE update : 'a ref -> ('a -> 'a) -> 'a 
+CLOSED: [2015-12-09 Wed 17:10]
+'update' calls a function on the contents of the reference argument,
+updates it with the result of the computation while returning the 
+original value.
+i.e. let r = ref 6 in update r (function x -> x + 1)
+returns (6 : int), now r = ref 7.
+*** let update r f =
+** DONE move : 'a list ref -> 'a list ref -> unit
+CLOSED: [2015-12-09 Wed 17:28]
+Removes the top argument from the first list and places it on the top
+of the second list. If the first list is empty, we will raise the 
+exception 'Empty'.
+*** let move l1 l2 =
+** TODO reverse : 'a list -> 'a list
+'reverse' may look functional, but the imperative behavior of the in-place
+reversal is encapsulated within the definition local to 'reverse'. We then
+return the local definition as the reversed 'a list.
+
+Aside from locally defined functions, we are only permitted:
+(!), (:=), ref, and 'move', as defined above.
+*** let reverse l =
+
+* The given prelude
+exception Empty;;
