@@ -1,0 +1,4 @@
+* Accessing Modules and Submodules
+** DONE Use the fully quaified names tof ix the compilation of 'bfs'
+CLOSED: [2015-12-10 Thu 12:48]
+*** You cannot use 'open'

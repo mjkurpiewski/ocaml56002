@@ -17,7 +17,8 @@ Removes the top argument from the first list and places it on the top
 of the second list. If the first list is empty, we will raise the 
 exception 'Empty'.
 *** let move l1 l2 =
-** TODO reverse : 'a list -> 'a list
+** DONE reverse : 'a list -> 'a list
+CLOSED: [2015-12-10 Thu 12:40]
 'reverse' may look functional, but the imperative behavior of the in-place
 reversal is encapsulated within the definition local to 'reverse'. We then
 return the local definition as the reversed 'a list.
