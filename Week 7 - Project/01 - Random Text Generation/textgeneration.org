@@ -73,7 +73,8 @@ desired target to drop, keeping all the rest.
 
 ** Types
 *** type ltable = (string * string list) list
-** TODO words : string -> string list
+** DONE words : string -> string list
+CLOSED: [2015-12-13 Sun 15:53]
 This function takes a sentence as input and returns a list of its words.
 As a first approximation, we will work in single sentences in simple
 English, so you can consider sequences of Roman letters and digits as
@@ -82,7 +83,8 @@ words and everything else as separators.
 *** If we want to build words bit-by-bit, we can use the Buffer module.
 This may be more difficult than it first appears.
 *** let words str =
-** TODO build_ltable : string list -> ltable
+** DONE build_ltable : string list -> ltable
+CLOSED: [2015-12-13 Sun 17:43]
 This function will build an associative list that maps each word present in the
 input text to all its possible successors, including duplicates. The table
 should also contain "START", which points to the first word, and "STOP, which
@@ -93,6 +95,8 @@ the last word points to. Here is a correct sample table for the "sentence":
   ("x", [ "y" ; "y" ]);
   ("START", [ "x" ]);
   ("y", [ "x" ; "z" ; "STOP" ]) ]
+**** Test Case
+build_ltable (words "x y z y x y");;
 *** let build_ltable words =
 ** TODO next_in_ltable : (string * string list) list -> string -> string
 This function takes a table, a given word, and returns a valid successor for
@@ -250,5 +254,3 @@ This combines several tables together. It is important that the prefix sizes
 remain consistent across the tables in the list. Otherwise, we fail with an
 exception.
 *** let merge_ptables tl =
-* The given prelude
-[[/home/pkurpiewski/Storage/Programming/OCaml/Intro to OCaml MOOC/Week 7 - Project/01 - Random Text Generation/textgeneration.prelude.ml][Link to textgeneration.prelude.ml]]
