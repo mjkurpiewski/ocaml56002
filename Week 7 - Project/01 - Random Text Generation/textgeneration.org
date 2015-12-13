@@ -1,0 +1,254 @@
+* Random Text Generation
+This project aims to synthesize natural language in the form of sentences
+using information gleaned from a body of work fed in to the software. We are
+given a text as input, from which we will compute the frequence of all sequences
+of two words in the original text. From this, we will produce new sentences that
+share the same frequencies.
+
+This is commonly known as Markov chain text generation. From the input text, we
+compute a transition table that associates each word of the text with the words
+that could be associated with it, along with a relative frequency of appearance.
+
+** Sample Frequency Table
+| word    | next    | frequency |
+
+| "START" | "I"     |       100 |
+| "I"     | "am"    |       100 |
+| "am"    | "a"     |       100 |
+| "a"     | "man"   |        25 |
+|         | "good"  |        75 |
+| "man"   | "and"   |        50 |
+|         | "STOP"  |        50 |
+| "and"   | "my"    |        50 |
+|         | "a"     |        50 |
+| "my"    | "dog"   |       100 |
+| "dog"   | "is"    |        33 |
+|         | "and"   |        33 |
+|         | "makes" |        33 |
+| "good"  | "dog"   |        66 |
+|         | "man"   |        34 |
+| "is"    | "a"     |       100 |
+| "makes" | "a"     |       100 |
+
+This table can be used to generate new text that resembles the input by starting
+from a "START" word and then iterate through the frequency table, following
+different paths, until we reach a "STOP" word.
+
+* Selective Grading
+** grade_only : int list -> unit
+grade_only is a function which takes, as input, an integer list, where the
+integers in the list denote the exercises the grader is supposed to check. For
+instance, calling grade_only [ 3 ];; at the header of the file will cause only
+exercise 3 to be tested.
+* Project Composition
+** Part I - A First Draft
+We build a quick prototype that goes from an input sentence to a randomly
+generated sentence via a distribution as seen in the sample frequency table
+seen above.
+** Part II - Performance Improvements
+We then refine the data structures to enhance performance and allow us to scale
+to larger scale corpus of work to use as input, for instance, small books.
+** Part III - Quality Improvements
+We then enhance the quality of the input and output by more intelligently
+analysing the input text corpus, as well as considering longer sequences of
+word chains, i.e., chains greater than 2 words in length.
+* Part I - A First Draft
+Our first goal is to construct a frequency table from which we can generate
+sentences. We'll do this as a very rough draft, leveraging lists and the
+predefined module operations we have access to. Our aim here is to use as
+much of the built in functionality of the List module as we can.
+
+We are using 'associative lists' as the data structure that links each word
+to its possible suffixes. 'Associative lists' are ideal data structures for
+prototyping purposes because they are easy to debug and reasonabout. However,
+the time complexity associated with searching for an element is extremely high.
+
+An 'associative list' that maps a "string" key to values of type 'a is a
+'(string * 'a) list'. The value associated with a key "x" is the right component
+of the first pair in the list whose left component is "x". This lookup is
+defined within the 'List' module as 'List.assoc'. For instance, to set "x"
+to 3, we are adding ("x", 3) to the front of the list. To remove an element,
+we can use List.filter with a predicate that drops elements that match the
+desired target to drop, keeping all the rest.
+
+** Types
+*** type ltable = (string * string list) list
+** TODO words : string -> string list
+This function takes a sentence as input and returns a list of its words.
+As a first approximation, we will work in single sentences in simple
+English, so you can consider sequences of Roman letters and digits as
+words and everything else as separators.
+
+*** If we want to build words bit-by-bit, we can use the Buffer module.
+This may be more difficult than it first appears.
+*** let words str =
+** TODO build_ltable : string list -> ltable
+This function will build an associative list that maps each word present in the
+input text to all its possible successors, including duplicates. The table
+should also contain "START", which points to the first word, and "STOP, which
+the last word points to. Here is a correct sample table for the "sentence":
+
+*** "x y z y x y"
+[ ("z", [ "y" ]);
+  ("x", [ "y" ; "y" ]);
+  ("START", [ "x" ]);
+  ("y", [ "x" ; "z" ; "STOP" ]) ]
+*** let build_ltable words =
+** TODO next_in_ltable : (string * string list) list -> string -> string
+This function takes a table, a given word, and returns a valid successor for
+the word. This function should respect the probability distribution, which will
+be trivially ensured by the presence of duplicates in our successor lists.
+*** let next_in_ltable table word =
+** TODO walk_ltable : (string * string list) list -> string list
+Given a table, this function will walk a table and give a sequence of words
+that forms a valid, random sentence using "START" and "END" as sentinels, but
+without displaying "START" and "END in the output sentence.
+*** let walk_ltable table =
+** display_quote : string list -> unit
+We can use this to display generated texts.
+* Part II - Performance Improvements
+Our aim with part II is to reuse some of the prior work and create a more
+performant text generator, one that leverages more efficient data structures.
+This will allow us to take even larger inputs and build larger transition
+tables.
+
+We will utilize hash tables, as defined in the OCaml standard module
+'Hashtbl'. Used correctly, these hash tables will provide performant
+insertion and extraction.
+
+We should make note of the difference between Hashtbl.add and
+Hashtbl.replace. We will likely use the former more than the latter.
+
+** Types
+*** type distribution =
+{ total : int;
+  amounts : (string * int) list }
+*** type htable =
+(string, distribution) Hashtbl.t
+** TODO compute_distribution : string list -> distribution
+This takes a list of strings as input and returns a pair containing the
+length of the string list and an association between each string present
+in the original list and the number of occurrences.
+This is much quicker and efficient than storing the duplicates in an
+'associative list' because we can increment and lookup values in the
+Hashtbl significantly more quickly.
+
+For example:
+*** compute_distribution ["a";"b";"c";"b";"c";"a";"b";"c";"c";"c"]
+{ total = 10; amounts = [("c", 5); ("b", 3); ("a", 2)] }
+*** Hint
+Sort the input!
+*** let compute_distribution l =
+** TODO build_htable : string list -> htable
+Instead of an 'associative list', like in build_ltable, here we will build
+a new version that creates a 'hash table'. This way, both table building
+and sentence generation should be much faster.
+
+Like with the 'associative list', the table is indexed by words, with each
+word also being associated with its successors. But instead of simply storing
+the list of successors, we use the storage format as seen in
+'compute_distribution' above.
+*** Hint
+We can define an intermediate table of type '(string, string list) Hashtbl.t'
+that stores the lists of successors with duplicates. We can then traverse this
+intermediary structure with 'Hashtbl.iter', adding the result of
+'compute_distribution' for each word to the final table returned.
+*** let build_htable words =
+** TODO next_in_htable : htable -> string -> string
+This is the same as 'next_in_ltable', as seen in Part I.
+*** let next_in_htable table word =
+** TODO walk_htable : htable -> string list
+This is the same as 'walk_ltable', as seen in Part I.
+*** let walk_htable table =
+* Part III - Quality Improvements
+In this section, we will refine the generation of setnences by including
+other aspects of syntax.
+
+Say we want to identify sequences of N| words in the text. The 'prefix_length'
+field contains N - 1|. The 'table' field associates each list of N - 1| words
+from the text with the distribution of its possible successors.
+
+The following table provides the lookup table for the example given at the
+beginning of the project:
+
+"I am a man and my dog is a good dog and a good dog makes a good man"
+
+and a size of 2|. You can see the branch points are fewer and make a bit more
+sense.
+
+As we can see, we continue to use "STOP" as an end marker, but instead of only
+one "START", we will use a "START" marker with the same prefix size; in this
+case we have [ "START" ; "START" ].
+
+** Example Table
+"I am a man and my dog is a good dog and a good dog makes a good man"
+
+| prefix ->          | next    | freq |
+| ["START"; "START"] | "I"     | 100% |
+| ["START"; "I"]     | "am"    | 100% |
+| ["I"; "am"]        | "a"     | 100% |
+| ["am; "a"]         | "man"   | 100% |
+| ["man; "and"]      | "my"    | 100% |
+| ["is"; "a"]        | "good"  | 100% |
+| ["and"; my"]       | "dog"   | 100% |
+| ["my"; "dog"]      | "is"    | 100% |
+| ["makes"; "a"]     | "good"  | 100% |
+| ["a"; "good"]      | "man"   |  33% |
+|                    | "dog"   |  66% |
+| ["dog"; "is"]      | "a"     | 100% |
+| ["and"; "a"]       | "good"  | 100% |
+| ["good"; "dog"]    | "makes" | 100% |
+|                    | "and"   |  50% |
+| ["dog"; "and"]     | "a"     | 100% |
+| ["a"; "man"]       | "and"   | 100% |
+| ["good"; "man"]    | "STOP"  | 100% |
+| ["dog"; "makes"]   | "a"     | 100% |
+
+
+** Types
+*** type ptable =
+{ prefix_length : int ;
+  table : (string list, distribution) Hhashtbl.t }
+** TODO sentences : string -> string list list
+'sentences' is a function that splits a string into a list of sub-sentences
+with rules such that
+*** Property I
+Uninterrupted sequences of roman letters, numbers, and non-ASCII characters
+(in the range '\128'..'\255') are words
+*** Property II
+These single punctuation characters count as words:
+';' , ',' , ':' , '-' , '"' , '\'' , '?' , '!' , '.'
+*** Property III
+These punctuation characters terminate sequences:
+'?' , '!' , '.'
+*** Property IV
+Everything else is a separator
+*** let sentences str =
+** TODO start : int -> string list
+This creates the start prefix for a given size.
+i.e. start 0 = [] ; start 1 = [ "START" ] ; start 2 = [ "START" ; "START" ]
+*** let rec start lp =
+** TODO shift : string list -> string -> string list
+This removes the front element of the list and puts the new element at the
+ending.
+i.e. shift [ "A" ; "B" ; "C" ] "D" = [ "B" ; "C" ; "D" ] or
+     shift [ "B" ; "C" ; "D" ] "E" = [ "C" ; "D" ; "E" ]
+*** let shift l x =
+** TODO build_ptable : string list -> int -> ptable
+Builds a table for a given prefix length using the two previous functions.
+*** let build_ptable words lp =
+** TODO walk_ptable : ptable -> string list
+'walk_ptable' will generate a sentence from a given 'ptable'. Unless you write
+specific annotations, 'next_in_htable' should be polymorphic enough to work on
+the field 'table' of a 'ptable', so you can reuse this. If you want, since we
+have proper sentence splitting, we can generate multi-sentence texts. We do
+this by choosing randomly to continue from the start after encountering a
+"STOP".
+*** let walk_ptable { table ; prefix_length = pl } =
+** TODO merge_ptables : ptable list -> ptable
+This combines several tables together. It is important that the prefix sizes
+remain consistent across the tables in the list. Otherwise, we fail with an
+exception.
+*** let merge_ptables tl =
+* The given prelude
+[[/home/pkurpiewski/Storage/Programming/OCaml/Intro to OCaml MOOC/Week 7 - Project/01 - Random Text Generation/textgeneration.prelude.ml][Link to textgeneration.prelude.ml]]
