@@ -1,26 +1,28 @@
-let words (str : string) : string list =
+let mandog = words "I am a man and my dog is a good dog and a good dog makes a good man";;
 
-  let explode (s : string) : char list =
-    let rec explode_aux (i : int) (acc : char list) =
-      if i < 0 then
-        acc
+(fun h -> Hashtbl.fold (fun k v acc -> (k, v) :: acc) h []) dogtbl;;
+
+let build_ltable (words : string list) : ltable =
+  let init_table = [("START"), [List.hd words]] in
+
+  let rec ltable_builder (words : string list) (table : ltable) : ltable =
+    match words with
+    | [] -> table
+
+    | hd :: [] ->
+      let local_builder = (fun x -> ltable_builder [] x) in
+      if List.mem_assoc hd table then
+        let keys = List.assoc hd table in
+        local_builder ((hd, "STOP" :: keys) :: (List.remove_assoc hd table))
       else
-        explode_aux (i - 1) (s.[i] :: acc) in
-    explode_aux (String.length s - 1) [] in
+        local_builder ((hd, ["STOP"]) :: table)
 
-  let w_buffer = Buffer.create 16 in
+    | hd :: nx :: tl ->
+      let local_builder = (fun x -> ltable_builder (nx :: tl) x) in
+      if List.mem_assoc hd table then
+        let keys = List.assoc hd table in
+        local_builder ((hd, nx :: keys) :: (List.remove_assoc hd table))
+      else
+        local_builder ((hd, [nx]) :: table)
 
-  let rec aux (cl : char list) (acc : string list) : string list =
-    match cl with
-    | [] ->
-      let to_add = Buffer.contents w_buffer in
-      to_add :: acc
-    | ' ' :: tl ->
-      let to_add = Buffer.contents w_buffer in
-      (Buffer.clear w_buffer; aux tl (to_add :: acc))
-    | c :: tl ->
-      (Buffer.add_char w_buffer c; aux tl acc)
-  in
-  List.rev (aux (explode str) []);;
-
-List.assoc "bar";;
+  in ltable_builder words init_table;;

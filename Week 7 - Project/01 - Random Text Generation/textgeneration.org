@@ -98,12 +98,14 @@ the last word points to. Here is a correct sample table for the "sentence":
 **** Test Case
 build_ltable (words "x y z y x y");;
 *** let build_ltable words =
-** TODO next_in_ltable : (string * string list) list -> string -> string
+** DONE next_in_ltable : (string * string list) list -> string -> string
+CLOSED: [2015-12-14 Mon 16:10]
 This function takes a table, a given word, and returns a valid successor for
 the word. This function should respect the probability distribution, which will
 be trivially ensured by the presence of duplicates in our successor lists.
 *** let next_in_ltable table word =
-** TODO walk_ltable : (string * string list) list -> string list
+** DONE walk_ltable : (string * string list) list -> string list
+CLOSED: [2015-12-14 Mon 16:22]
 Given a table, this function will walk a table and give a sequence of words
 that forms a valid, random sentence using "START" and "END" as sentinels, but
 without displaying "START" and "END in the output sentence.
@@ -129,7 +131,8 @@ Hashtbl.replace. We will likely use the former more than the latter.
   amounts : (string * int) list }
 *** type htable =
 (string, distribution) Hashtbl.t
-** TODO compute_distribution : string list -> distribution
+** DONE compute_distribution : string list -> distribution
+CLOSED: [2015-12-14 Mon 17:04]
 This takes a list of strings as input and returns a pair containing the
 length of the string list and an association between each string present
 in the original list and the number of occurrences.
@@ -143,7 +146,8 @@ For example:
 *** Hint
 Sort the input!
 *** let compute_distribution l =
-** TODO build_htable : string list -> htable
+** DONE build_htable : string list -> htable
+CLOSED: [2015-12-16 Wed 15:38]
 Instead of an 'associative list', like in build_ltable, here we will build
 a new version that creates a 'hash table'. This way, both table building
 and sentence generation should be much faster.

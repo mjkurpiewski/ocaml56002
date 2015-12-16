@@ -1,0 +1,500 @@
+* Module: Hashtbl
+module Hashtbl: sig .. end
+
+** Generic interface
+*** type ('a, 'b) t
+The type of hash tables from type 'a to type 'b.
+Hash tables are hashed association tables, with in-place modification.
+**** type ('a, 'b) t
+The type of hash tables from type 'a to type 'b.
+*** val create : ?random:bool -> int -> ('a, 'b) t
+Hashtbl.create n creates a new, empty hash table, with initial size n. For best
+results, n should be on the order of the expected number of elements that will
+be in the table. The table grows as needed, so n is just an initial guess.
+
+The optional random parameter (a boolean) controls whether the internal
+organization of the hash table is randomized at each execution of Hashtbl.create
+or deterministic over all executions.
+
+**** A hash table that is created with ~random:false uses a fixed hash function
+(Hashtbl.hash) to distribute keys among buckets. As a consequence, collisions
+between keys happen deterministically. In Web-facing applications or other
+security-sensitive applications, the deterministic collision patterns can be
+exploited by a malicious user to create a denial-of-service attack: the attacker
+sends input crafted to create many collisions in the table, slowing the
+application down.
+
+**** A hash table that is created with ~random:true uses the seeded hash function
+Hashtbl.seeded_hash with a seed that is randomly chosen at hash table creation
+time. In effect, the hash function used is randomly selected among 2^{30}
+different hash functions. All these hash functions have different collision
+patterns, rendering ineffective the denial-of-service attack described above.
+However, because of randomization, enumerating all elements of the hash table
+using Hashtbl.fold or Hashtbl.iter is no longer deterministic: elements are
+enumerated in different orders at different runs of the program.
+
+**** If no ~random parameter is given, hash tables are created in non-random mode by
+default. This default can be changed either programmatically by calling
+Hashtbl.randomize or by setting the R flag in the OCAMLRUNPARAM environment
+variable.
+Before 4.00.0 the random parameter was not present and all hash tables were
+created in non-randomized mode.
+
+*** val clear : ('a, 'b) t -> unit
+Empty a hash table. Use reset instead of clear to shrink the size of the bucket
+table to its initial size.
+*** val reset : ('a, 'b) t -> unit
+Empty a hash table and shrink the size of the bucket table to its initial size.
+Since 4.00.0
+*** val copy : ('a, 'b) t -> ('a, 'b) t
+Return a copy of the given hashtable.
+*** val add : ('a, 'b) t -> 'a -> 'b -> unit
+Hashtbl.add tbl x y adds a binding of x to y in table tbl. Previous bindings for
+x are not removed, but simply hidden. That is, after performing Hashtbl.remove
+tbl x, the previous binding for x, if any, is restored. (Same behavior as with
+association lists.)
+*** val find : ('a, 'b) t -> 'a -> 'b
+Hashtbl.find tbl x returns the current binding of x in tbl, or raises Not_found
+if no such binding exists.
+*** val find_all : ('a, 'b) t -> 'a -> 'b list
+Hashtbl.find_all tbl x returns the list of all data associated with x in tbl.
+The current binding is returned first, then the previous bindings, in reverse
+order of introduction in the table.
+*** val mem : ('a, 'b) t -> 'a -> bool
+Hashtbl.mem tbl x checks if x is bound in tbl.
+*** val remove : ('a, 'b) t -> 'a -> unit
+Hashtbl.remove tbl x removes the current binding of x in tbl, restoring the
+previous binding if it exists. It does nothing if x is not bound in tbl.
+*** val replace : ('a, 'b) t -> 'a -> 'b -> unit
+Hashtbl.replace tbl x y replaces the current binding of x in tbl by a binding of
+x to y. If x is unbound in tbl, a binding of x to y is added to tbl. This is
+functionally equivalent to Hashtbl.remove tbl x followed by Hashtbl.add tbl x y.
+*** val iter : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
+Hashtbl.iter f tbl applies f to all bindings in table tbl. f receives the key as
+first argument, and the associated value as second argument. Each binding is
+presented exactly once to f.
+
+The order in which the bindings are passed to f is unspecified. However, if the
+table contains several bindings for the same key, they are passed to f in
+reverse order of introduction, that is, the most recent binding is passed first.
+
+If the hash table was created in non-randomized mode, the order in which the
+bindings are enumerated is reproducible between successive runs of the program,
+and even between minor versions of OCaml. For randomized hash tables, the order
+of enumeration is entirely random.
+
+*** val fold : ('a -> 'b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c
+Hashtbl.fold f tbl init computes (f kN dN ... (f k1 d1 init)...), where k1 ...
+kN are the keys of all bindings in tbl, and d1 ... dN are the associated values.
+Each binding is presented exactly once to f.
+
+The order in which the bindings are passed to f is unspecified. However, if the
+table contains several bindings for the same key, they are passed to f in
+reverse order of introduction, that is, the most recent binding is passed first.
+
+If the hash table was created in non-randomized mode, the order in which the
+bindings are enumerated is reproducible between successive runs of the program,
+and even between minor versions of OCaml. For randomized hash tables, the order
+of enumeration is entirely random.
+
+*** val length : ('a, 'b) t -> int
+Hashtbl.length tbl returns the number of bindings in tbl. It takes constant
+time. Multiple bindings are counted once each, so Hashtbl.length gives the
+number of times Hashtbl.iter calls its first argument.
+val randomize : unit -> unit
+After a call to Hashtbl.randomize(), hash tables are created in randomized mode
+by default: Hashtbl.create returns randomized hash tables, unless the ~
+random:false optional parameter is given. The same effect can be achieved by
+setting the R parameter in the OCAMLRUNPARAM environment variable.
+
+It is recommended that applications or Web frameworks that need to protect
+themselves against the denial-of-service attack described in Hashtbl.create call
+Hashtbl.randomize() at initialization time.
+
+Note that once Hashtbl.randomize() was called, there is no way to revert to the
+non-randomized default behavior of Hashtbl.create. This is intentional.
+Non-randomized hash tables can still be created using Hashtbl.create ~
+random:false.
+Since 4.00.0
+
+*** type statistics = {
+
+  num_bindings : int;           (* Number of bindings present in the *)
+                                   table. Same value as returned by
+                                   Hashtbl.length.
+  num_buckets : int;            (* Number of buckets in the table.   *)
+  max_bucket_length : int;      (* Maximal number of bindings per    *)
+                                   bucket.
+  bucket_histogram : int array; (* Histogram of bucket sizes. This   *)
+                                   array histo has length
+                                   max_bucket_length + 1. The value
+                                   of histo.(i) is the number of
+                                   buckets whose size is i.
+}
+*** val stats : ('a, 'b) t -> statistics
+Hashtbl.stats tbl returns statistics about the table tbl: number of buckets,
+size of the biggest bucket, distribution of buckets by size.
+Since 4.00.0
+** Functorial interface
+The functorial interface allows the use of specific comparison and hash
+functions, either for performance/security concerns, or because keys are not
+hashable/comparable with the polymorphic builtins.
+
+For instance, one might want to specialize a table for integer keys. The
+following will illustrate this as so:
+
+This creates a new module IntHashtbl, with a new type 'a IntHashtbl.t of tables
+from int to 'a. In this example, h contains string values so its type is string
+IntHashtbl.t.
+
+Note that the new type 'a IntHashtbl.t is not compatible with the type ('a,'b)
+Hashtbl.t of the generic interface. For example, Hashtbl.length h would not
+type-check, you must use IntHashtbl.length.
+*** module IntHash =
+struct
+  type t = int
+  let equal i j = i=j
+  let hash i = i land max_int
+end
+*** module IntHashtbl = Hashtbl.Make(IntHash)
+let h = IntHashtbl.create 17 in
+  IntHashtbl.add h 12 "hello";;
+*** module type HashedType = sig .. end
+The input signature of the functor Hashtbl.Make.
+*** module type S = sig .. end
+The output signature of the functor Hashtbl.Make.
+module Make:
+functor (H : HashedType) -> S  with type key = H.t
+Functor building an implementation of the hashtable structure.
+*** module type SeededHashedType = sig .. end
+The input signature of the functor Hashtbl.MakeSeeded.
+*** module type SeededS = sig .. end
+The output signature of the functor Hashtbl.MakeSeeded.
+module MakeSeeded:
+functor (H : SeededHashedType) -> SeededS  with type key = H.t
+Functor building an implementation of the hashtable structure.
+** The polymorphic hash functions
+*** val hash : 'a -> int
+Hashtbl.hash x associates a nonnegative integer to any value of any type. It is
+guaranteed that if x = y or Pervasives.compare x y = 0, then hash x = hash y.
+Moreover, hash always terminates, even on cyclic structures.
+*** val seeded_hash : int -> 'a -> int
+A variant of Hashtbl.hash that is further parameterized by an integer seed.
+Since 4.00.0
+*** val hash_param : int -> int -> 'a -> int
+Hashtbl.hash_param meaningful total x computes a hash value for x, with the same
+properties as for hash. The two extra integer parameters meaningful and total
+give more precise control over hashing. Hashing performs a breadth-first,
+left-to-right traversal of the structure x, stopping after meaningful meaningful
+nodes were encountered, or total nodes (meaningful or not) were encountered.
+Meaningful nodes are: integers; floating-point numbers; strings; characters;
+booleans; and constant constructors. Larger values of meaningful and total means
+that more nodes are taken into account to compute the final hash value, and
+therefore collisions are less likely to happen. However, hashing takes longer.
+The parameters meaningful and total govern the tradeoff between accuracy and
+speed. As default choices, Hashtbl.hash and Hashtbl.seeded_hash take meaningful
+= 10 and total = 100.
+*** val seeded_hash_param : int -> int -> int -> 'a -> int
+A variant of Hashtbl.hash_param that is further parameterized by an integer
+seed. Usage: Hashtbl.seeded_hash_param meaningful total seed x.
+Since 4.00.0
+*** val create : ?random:bool -> int -> ('a, 'b) t
+Hashtbl.create n creates a new, empty hash table, with initial size n. For best
+results, n should be on the order of the expected number of elements that will
+be in the table. The table grows as needed, so n is just an initial guess.
+
+The optional random parameter (a boolean) controls whether the internal
+organization of the hash table is randomized at each execution of Hashtbl.create
+or deterministic over all executions.
+
+*** A hash table that is created with ~random:false uses a fixed hash function
+(Hashtbl.hash) to distribute keys among buckets. As a consequence, collisions
+between keys happen deterministically. In Web-facing applications or other
+security-sensitive applications, the deterministic collision patterns can be
+exploited by a malicious user to create a denial-of-service attack: the attacker
+sends input crafted to create many collisions in the table, slowing the
+application down.
+
+*** A hash table that is created with ~random:true uses the seeded hash function
+Hashtbl.seeded_hash with a seed that is randomly chosen at hash table creation
+time. In effect, the hash function used is randomly selected among 2^{30}
+different hash functions. All these hash functions have different collision
+patterns, rendering ineffective the denial-of-service attack described above.
+However, because of randomization, enumerating all elements of the hash table
+using Hashtbl.fold or Hashtbl.iter is no longer deterministic: elements are
+enumerated in different orders at different runs of the program.
+
+*** If no ~random parameter is given, hash tables are created in non-random mode by
+default. This default can be changed either programmatically by calling
+Hashtbl.randomize or by setting the R flag in the OCAMLRUNPARAM environment
+variable.
+Before 4.00.0 the random parameter was not present and all hash tables were
+created in non-randomized mode.
+
+*** val clear : ('a, 'b) t -> unit
+Empty a hash table. Use reset instead of clear to shrink the size of the bucket
+table to its initial size.
+*** val reset : ('a, 'b) t -> unit
+Empty a hash table and shrink the size of the bucket table to its initial size.
+Since 4.00.0
+*** val copy : ('a, 'b) t -> ('a, 'b) t
+Return a copy of the given hashtable.
+*** val add : ('a, 'b) t -> 'a -> 'b -> unit
+Hashtbl.add tbl x y adds a binding of x to y in table tbl. Previous bindings for
+x are not removed, but simply hidden. That is, after performing Hashtbl.remove
+tbl x, the previous binding for x, if any, is restored. (Same behavior as with
+association lists.)
+*** val find : ('a, 'b) t -> 'a -> 'b
+Hashtbl.find tbl x returns the current binding of x in tbl, or raises Not_found
+if no such binding exists.
+*** val find_all : ('a, 'b) t -> 'a -> 'b list
+Hashtbl.find_all tbl x returns the list of all data associated with x in tbl.
+The current binding is returned first, then the previous bindings, in reverse
+order of introduction in the table.
+*** val mem : ('a, 'b) t -> 'a -> bool
+Hashtbl.mem tbl x checks if x is bound in tbl.
+*** val remove : ('a, 'b) t -> 'a -> unit
+Hashtbl.remove tbl x removes the current binding of x in tbl, restoring the
+previous binding if it exists. It does nothing if x is not bound in tbl.
+*** val replace : ('a, 'b) t -> 'a -> 'b -> unit
+Hashtbl.replace tbl x y replaces the current binding of x in tbl by a binding of
+x to y. If x is unbound in tbl, a binding of x to y is added to tbl. This is
+functionally equivalent to Hashtbl.remove tbl x followed by Hashtbl.add tbl x y.
+*** val iter : ('a -> 'b -> unit) -> ('a, 'b) t -> unit
+Hashtbl.iter f tbl applies f to all bindings in table tbl. f receives the key as
+first argument, and the associated value as second argument. Each binding is
+presented exactly once to f.
+
+The order in which the bindings are passed to f is unspecified. However, if the
+table contains several bindings for the same key, they are passed to f in
+reverse order of introduction, that is, the most recent binding is passed first.
+
+If the hash table was created in non-randomized mode, the order in which the
+bindings are enumerated is reproducible between successive runs of the program,
+and even between minor versions of OCaml. For randomized hash tables, the order
+of enumeration is entirely random.
+
+*** val fold : ('a -> 'b -> 'c -> 'c) -> ('a, 'b) t -> 'c -> 'c
+Hashtbl.fold f tbl init computes (f kN dN ... (f k1 d1 init)...), where k1 ...
+kN are the keys of all bindings in tbl, and d1 ... dN are the associated values.
+Each binding is presented exactly once to f.
+
+The order in which the bindings are passed to f is unspecified. However, if the
+table contains several bindings for the same key, they are passed to f in
+reverse order of introduction, that is, the most recent binding is passed first.
+
+If the hash table was created in non-randomized mode, the order in which the
+bindings are enumerated is reproducible between successive runs of the program,
+and even between minor versions of OCaml. For randomized hash tables, the order
+of enumeration is entirely random.
+
+*** val length : ('a, 'b) t -> int
+Hashtbl.length tbl returns the number of bindings in tbl. It takes constant
+time. Multiple bindings are counted once each, so Hashtbl.length gives the
+number of times Hashtbl.iter calls its first argument.
+val randomize : unit -> unit
+After a call to Hashtbl.randomize(), hash tables are created in randomized mode
+by default: Hashtbl.create returns randomized hash tables, unless the ~
+random:false optional parameter is given. The same effect can be achieved by
+setting the R parameter in the OCAMLRUNPARAM environment variable.
+
+It is recommended that applications or Web frameworks that need to protect
+themselves against the denial-of-service attack described in Hashtbl.create call
+Hashtbl.randomize() at initialization time.
+
+Note that once Hashtbl.randomize() was called, there is no way to revert to the
+non-randomized default behavior of Hashtbl.create. This is intentional.
+Non-randomized hash tables can still be created using Hashtbl.create ~
+random:false.
+Since 4.00.0
+
+*** type statistics = {
+
+  num_bindings : int;           (* Number of bindings present in the *)
+                                   table. Same value as returned by
+                                   Hashtbl.length.
+  num_buckets : int;            (* Number of buckets in the table.   *)
+  max_bucket_length : int;      (* Maximal number of bindings per    *)
+                                   bucket.
+  bucket_histogram : int array; (* Histogram of bucket sizes. This   *)
+                                   array histo has length
+                                   max_bucket_length + 1. The value
+                                   of histo.(i) is the number of
+                                   buckets whose size is i.
+}
+*** val stats : ('a, 'b) t -> statistics
+Hashtbl.stats tbl returns statistics about the table tbl: number of buckets,
+size of the biggest bucket, distribution of buckets by size.
+Since 4.00.0
+
+* Module: List
+ module List: sig .. end
+
+** List operations.
+
+Some functions are flagged as not tail-recursive. A tail-recursive function uses
+constant stack space, while a non-tail-recursive function uses stack space
+proportional to the length of its list argument, which can be a problem with
+very long lists. When the function takes several list arguments, an approximate
+formula giving stack usage (in some unspecified constant unit) is shown in
+parentheses.
+
+The above considerations can usually be ignored if your lists are not longer
+than about 10000 elements.
+
+*** val length : 'a list -> int
+Return the length (number of elements) of the given list.
+*** val hd : 'a list -> 'a
+Return the first element of the given list. Raise Failure "hd" if the list is
+empty.
+*** val tl : 'a list -> 'a list
+Return the given list without its first element. Raise Failure "tl" if the list
+is empty.
+*** val nth : 'a list -> int -> 'a
+Return the n-th element of the given list. The first element (head of the list)
+is at position 0. Raise Failure "nth" if the list is too short. Raise
+Invalid_argument "List.nth" if n is negative.
+*** val rev : 'a list -> 'a list
+List reversal.
+*** val append : 'a list -> 'a list -> 'a list
+Catenate two lists. Same function as the infix operator @. Not tail-recursive
+(length of the first argument). The @ operator is not tail-recursive either.
+*** val rev_append : 'a list -> 'a list -> 'a list
+List.rev_append l1 l2 reverses l1 and concatenates it to l2. This is equivalent
+to List.rev l1 @ l2, but rev_append is tail-recursive and more efficient.
+*** val concat : 'a list list -> 'a list
+Concatenate a list of lists. The elements of the argument are all concatenated
+together (in the same order) to give the result. Not tail-recursive (length of
+the argument + length of the longest sub-list).
+*** val flatten : 'a list list -> 'a list
+Same as concat. Not tail-recursive (length of the argument + length of the
+longest sub-list).
+** Iterators
+*** val iter : ('a -> unit) -> 'a list -> unit
+List.iter f [a1; ...; an] applies function f in turn to a1; ...; an. It is
+equivalent to begin f a1; f a2; ...; f an; () end.
+*** val iteri : (int -> 'a -> unit) -> 'a list -> unit
+Same as List.iter, but the function is applied to the index of the element as
+first argument (counting from 0), and the element itself as second argument.
+Since 4.00.0
+*** val map : ('a -> 'b) -> 'a list -> 'b list
+List.map f [a1; ...; an] applies function f to a1, ..., an, and builds the list
+[f a1; ...; f an] with the results returned by f. Not tail-recursive.
+*** val mapi : (int -> 'a -> 'b) -> 'a list -> 'b list
+Same as List.map, but the function is applied to the index of the element as
+first argument (counting from 0), and the element itself as second argument. Not
+tail-recursive.
+Since 4.00.0
+*** val rev_map : ('a -> 'b) -> 'a list -> 'b list
+List.rev_map f l gives the same result as List.rev (List.map f l), but is
+tail-recursive and more efficient.
+*** val fold_left : ('a -> 'b -> 'a) -> 'a -> 'b list -> 'a
+List.fold_left f a [b1; ...; bn] is f (... (f (f a b1) b2) ...) bn.
+*** val fold_right : ('a -> 'b -> 'b) -> 'a list -> 'b -> 'b
+List.fold_right f [a1; ...; an] b is f a1 (f a2 (... (f an b) ...)). Not
+tail-recursive.
+** Iterators on two lists
+*** val iter2 : ('a -> 'b -> unit) -> 'a list -> 'b list -> unit
+List.iter2 f [a1; ...; an] [b1; ...; bn] calls in turn f a1 b1; ...; f an bn.
+Raise Invalid_argument if the two lists have different lengths.
+*** val map2 : ('a -> 'b -> 'c) -> 'a list -> 'b list -> 'c list
+List.map2 f [a1; ...; an] [b1; ...; bn] is [f a1 b1; ...; f an bn]. Raise
+Invalid_argument if the two lists have different lengths. Not tail-recursive.
+*** val rev_map2 : ('a -> 'b -> 'c) -> 'a list -> 'b list -> 'c list
+List.rev_map2 f l1 l2 gives the same result as List.rev (List.map2 f l1 l2), but
+is tail-recursive and more efficient.
+*** val fold_left2 : ('a -> 'b -> 'c -> 'a) -> 'a -> 'b list -> 'c list -> 'a
+List.fold_left2 f a [b1; ...; bn] [c1; ...; cn] is f (... (f (f a b1 c1) b2 c2) .
+..) bn cn. Raise Invalid_argument if the two lists have different lengths.
+*** val fold_right2 : ('a -> 'b -> 'c -> 'c) -> 'a list -> 'b list -> 'c -> 'c
+List.fold_right2 f [a1; ...; an] [b1; ...; bn] c is f a1 b1 (f a2 b2 (... (f an
+bn c) ...)). Raise Invalid_argument if the two lists have different lengths. Not
+tail-recursive.
+** List scanning
+*** val for_all : ('a -> bool) -> 'a list -> bool
+for_all p [a1; ...; an] checks if all elements of the list satisfy the predicate
+p. That is, it returns (p a1) && (p a2) && ... && (p an).
+*** val exists : ('a -> bool) -> 'a list -> bool
+exists p [a1; ...; an] checks if at least one element of the list satisfies the
+predicate p. That is, it returns (p a1) || (p a2) || ... || (p an).
+*** val for_all2 : ('a -> 'b -> bool) -> 'a list -> 'b list -> bool
+Same as List.for_all, but for a two-argument predicate. Raise Invalid_argument
+if the two lists have different lengths.
+*** val exists2 : ('a -> 'b -> bool) -> 'a list -> 'b list -> bool
+Same as List.exists, but for a two-argument predicate. Raise Invalid_argument if
+the two lists have different lengths.
+*** val mem : 'a -> 'a list -> bool
+mem a l is true if and only if a is equal to an element of l.
+*** val memq : 'a -> 'a list -> bool
+Same as List.mem, but uses physical equality instead of structural equality to
+compare list elements.
+** List searching
+*** val find : ('a -> bool) -> 'a list -> 'a
+find p l returns the first element of the list l that satisfies the predicate p.
+Raise Not_found if there is no value that satisfies p in the list l.
+*** val filter : ('a -> bool) -> 'a list -> 'a list
+filter p l returns all the elements of the list l that satisfy the predicate p.
+The order of the elements in the input list is preserved.
+*** val find_all : ('a -> bool) -> 'a list -> 'a list
+find_all is another name for List.filter.
+*** val partition : ('a -> bool) -> 'a list -> 'a list * 'a list
+partition p l returns a pair of lists (l1, l2), where l1 is the list of all the
+elements of l that satisfy the predicate p, and l2 is the list of all the
+elements of l that do not satisfy p. The order of the elements in the input list
+is preserved.
+** Association lists
+*** val assoc : 'a -> ('a * 'b) list -> 'b
+assoc a l returns the value associated with key a in the list of pairs l. That
+is, assoc a [ ...; (a,b); ...] = b if (a,b) is the leftmost binding of a in list
+l. Raise Not_found if there is no value associated with a in the list l.
+*** val assq : 'a -> ('a * 'b) list -> 'b
+Same as List.assoc, but uses physical equality instead of structural equality to
+compare keys.
+*** val mem_assoc : 'a -> ('a * 'b) list -> bool
+Same as List.assoc, but simply return true if a binding exists, and false if no
+bindings exist for the given key.
+*** val mem_assq : 'a -> ('a * 'b) list -> bool
+Same as List.mem_assoc, but uses physical equality instead of structural
+equality to compare keys.
+*** val remove_assoc : 'a -> ('a * 'b) list -> ('a * 'b) list
+remove_assoc a l returns the list of pairs l without the first pair with key a,
+if any. Not tail-recursive.
+*** val remove_assq : 'a -> ('a * 'b) list -> ('a * 'b) list
+Same as List.remove_assoc, but uses physical equality instead of structural
+equality to compare keys. Not tail-recursive.
+** Lists of pairs
+*** val split : ('a * 'b) list -> 'a list * 'b list
+Transform a list of pairs into a pair of lists: split [(a1,b1); ...; (an,bn)] is
+([a1; ...; an], [b1; ...; bn]). Not tail-recursive.
+*** val combine : 'a list -> 'b list -> ('a * 'b) list
+Transform a pair of lists into a list of pairs: combine [a1; ...; an] [b1; ...;
+bn] is [(a1,b1); ...; (an,bn)]. Raise Invalid_argument if the two lists have
+different lengths. Not tail-recursive.
+** Sorting
+*** val sort : ('a -> 'a -> int) -> 'a list -> 'a list
+Sort a list in increasing order according to a comparison function. The
+comparison function must return 0 if its arguments compare as equal, a positive
+integer if the first is greater, and a negative integer if the first is smaller
+(see Array.sort for a complete specification). For example, compare is a
+suitable comparison function. The resulting list is sorted in increasing order.
+List.sort is guaranteed to run in constant heap space (in addition to the size
+of the result list) and logarithmic stack space.
+
+The current implementation uses Merge Sort. It runs in constant heap space and
+logarithmic stack space.
+*** val stable_sort : ('a -> 'a -> int) -> 'a list -> 'a list
+Same as List.sort, but the sorting algorithm is guaranteed to be stable (i.e.
+elements that compare equal are kept in their original order) .
+
+The current implementation uses Merge Sort. It runs in constant heap space and
+logarithmic stack space.
+*** val fast_sort : ('a -> 'a -> int) -> 'a list -> 'a list
+Same as List.sort or List.stable_sort, whichever is faster on typical input.
+*** val sort_uniq : ('a -> 'a -> int) -> 'a list -> 'a list
+Same as List.sort, but also remove duplicates.
+*** val merge : ('a -> 'a -> int) -> 'a list -> 'a list -> 'a list
+Merge two lists: Assuming that l1 and l2 are sorted according to the comparison
+function cmp, merge cmp l1 l2 will return a sorted list containting all the
+elements of l1 and l2. If several elements compare equal, the elements of l1
+will be before the elements of l2. Not tail-recursive (sum of the lengths of the
+arguments).

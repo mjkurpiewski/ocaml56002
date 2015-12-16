@@ -70,5 +70,13 @@ let next_in_ltable (table : ltable) (word : string) : string =
   else
     let candidates = List.assoc word table in
     List.nth candidates (Random.int (List.length candidates));;
-    (* let frequencies = freq_generator candidates in *)
-    (* return_highest_freq frequencies;; *)
+
+let walk_ltable (corpus : ltable) : string list =
+  let rec walk_helper (sentence : string list) (last_word : string) =
+    let next_word = next_in_ltable corpus last_word in
+    if next_word = "STOP" then
+      List.rev sentence
+    else
+      walk_helper (next_word :: sentence) next_word
+  in
+  walk_helper [] "START";;
