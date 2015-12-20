@@ -72,3 +72,33 @@ let build_htable (words : string list) =
     constructed_hash;
 
   final_hash;;
+
+let next_in_htable (corpus : htable) (word : string) : string =
+  let word_distribtuion = Hashtbl.find corpus word in
+  let total_weight = word_distribtuion.total in
+  let candidates = word_distribtuion.amounts in
+  let random_float = Random.float 1.0 in
+
+  let rec aux (candidates : frequencies) (placeholder : float) : string =
+    match candidates with
+    | [] -> ""
+    | (word, occur) :: [] -> word
+    | (word, occur) :: tl ->
+      let local_probability = float_of_int occur /. float_of_int total_weight in
+      let relative_probability = local_probability +. placeholder in
+      if random_float >= placeholder && random_float < relative_probability then
+        word
+      else
+        aux tl relative_probability
+  in
+  aux candidates 0.0;;
+
+let walk_htable (corpus : htable) : string list =
+  let rec walk_helper (sentence : string list) (last_word : string) =
+    let next_word = next_in_htable corpus last_word in
+    if next_word = "STOP" then
+      List.rev sentence
+    else
+      walk_helper (next_word :: sentence) next_word
+  in
+  walk_helper [] "START";;

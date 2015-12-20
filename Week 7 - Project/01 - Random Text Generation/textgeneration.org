@@ -162,10 +162,12 @@ that stores the lists of successors with duplicates. We can then traverse this
 intermediary structure with 'Hashtbl.iter', adding the result of
 'compute_distribution' for each word to the final table returned.
 *** let build_htable words =
-** TODO next_in_htable : htable -> string -> string
+** DONE next_in_htable : htable -> string -> string
+CLOSED: [2015-12-20 Sun 14:21]
 This is the same as 'next_in_ltable', as seen in Part I.
 *** let next_in_htable table word =
-** TODO walk_htable : htable -> string list
+** DONE walk_htable : htable -> string list
+CLOSED: [2015-12-20 Sun 14:47]
 This is the same as 'walk_ltable', as seen in Part I.
 *** let walk_htable table =
 * Part III - Quality Improvements
@@ -216,7 +218,7 @@ case we have [ "START" ; "START" ].
 ** Types
 *** type ptable =
 { prefix_length : int ;
-  table : (string list, distribution) Hhashtbl.t }
+  table : (string list, distribution) Hashtbl.t }
 ** TODO sentences : string -> string list list
 'sentences' is a function that splits a string into a list of sub-sentences
 with rules such that
