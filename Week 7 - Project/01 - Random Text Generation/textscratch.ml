@@ -1,31 +1,7 @@
-Random.self_init
-
-Random.float 1;;
-
 let mandog = words "I am a man and my dog is a good dog and a good dog makes a good man";;
 
-et print_table table = Hashtbl.fold (fun k v acc -> (k, v) :: acc) table [];;
+let print_table table = Hashtbl.fold (fun k v acc -> (k, v) :: acc) table [];;
 (fun h -> Hashtbl.fold (fun k v acc -> (k, v) :: acc) h []) dogtbl;;
-
-let next_in_ltable (table : ltable) (word : string) : string =
-  if not (List.mem_assoc word table) then
-    raise Not_found
-  else
-    let candidates = List.assoc word table in
-    List.nth candidates (Random.int (List.length candidates));;
-
-
-
-  List.fold_left
-    (fun acc x ->
-       let (name, value) = x in
-       (name, (float_of_int value /. total_entries)) :: acc)
-    []
-    choices;;
-
-
-Computing
-next_in_htable
 
 (let table = Hashtbl.create 16 in
  Hashtbl.add table "a"
@@ -52,77 +28,36 @@ next_in_htable
    {total = 2; amounts = [("where", 1); ("in", 1)]} ;
  table)
 
-  let total : float = float_of_int word_distribtuion.total in
-  let freqs : frequencies = word_distribtuion.amounts in
-  let random_float : float = Random.float 1.0 in
+(* Char values - \32 -> \255 *)
 
-  let rec aux
-      (freqs : frequencies)
-      (rand : float) =
-    match freqs with
-    | [] -> ""
-    | (name, prob) :: [] -> name
-    | (name, prob) :: tl ->
-      if 0.0 < random_float && random_float <= (float_of_int prob /. total) then
-        (print_float random_float; name)
-      else
-        aux tl rand
+let testthing = "The Christmas Cottage, a biopic about the artist Thomas Kinkade, famous for the quaint-scary-ugly paintings he sells in shopping malls, is a cinematic portrait of the multimillionaire artist as a young man. Kinkade co-produced the movie, which went straight to DVD when it came out in 2008. In a pivotal scene, the budding “Painter of Light,” home from college, gathers with his mother and younger brother on Christmas morning.";;
+List.
+let stru = Str.full_split (Str.regexp "[\\.\\?\\!]+") testthing;;
+
+  let corpus_splitter : string list =
+    let tagged_split = Str.full_split (Str.regexp "[\\.\\?\\!]+") str in
+    let rec list_builder (sentence_list : string list) (to_consume : Str.split_result list) =
+      match to_consume with
+      | [] -> sentence_list
+      | Text (s) :: Delim (d) :: tl -> list_builder ((s ^ d) :: sentence_list) tl
+    in
+    list_builder [] tagged_split
   in
-  aux freqs random_float;;
-
-(* Testing on "a b a c a c a" *)
-(* Expected distribution for "c" *)
-(* "c" -> "a" 100% *)
-(* 0 pt Unexpected distribution for "a" *)
-(* "a" -> "STOP" 0% *)
-(* "a" -> "b" 25% *)
-(* "a" -> "c" 74% *)
-(* Expected distribution for "START" *)
-(* "START" -> "a" 100% *)
-(* Expected distribution for "b" *)
-(*     "b" -> "a" 100% *)
+  List.map words corpus_splitter;;
 
 
-             let rec aux
-      (freqs : frequencies)
-      (counters : int * int)
-      (rand : int) =
-    match freqs with
-    | [] -> ""
-    | (name, prob) :: [] -> name
-    | (name, prob) :: tl ->
-      let (c1, loc_prob) = counters in
-      print_string (string_of_int rand); print_newline ();
-      print_string ((string_of_int c1) ^ " " ^ (string_of_int loc_prob));
-      print_newline ();
-      print_string name;
-      print_newline ();
-      if c1 = rand then
-        name
-      else if prob > 0 then
-        aux choices (c1 + 1, loc_prob - 1) rand
-      else
-        aux tl (c1 + 1, 0) rand
+  let rec sentence_builder
+      (sentences : string list)
+      (offset : int)
+      (length : int) : string list =
+    try
+      let char_at = str.[length + offset] in
+      match char_at with
+      | c when is_terminator char_at ->
+        (print_string "Found a terminator!";
+          sentence_builder ((String.sub str offset length) :: sentences) (length + 1) 0)
+      | c -> sentence_builder sentences offset (length + 1)
+    with
+    | _ -> sentences
   in
-  aux choices (1, 1) rng;;
-
-
-  let total_entries = word_distribtuion.total in
-let choices = word_distribtuion.amounts in
-
-int rouletteSelect(double[] weight) {
-  // calculate the total weight
-  double weight_sum = 0;
-  for(int i=0; i<weight.length; i++) {
-    weight_sum += weight[i];
-  }
-  // get a random value
-  double value = randUniformPositive() * weight_sum;
-  // locate the random value based on the weights
-  for(int i=0; i<weight.length; i++) {
-    value -= weight[i];
-    if(value <= 0) return i;
-  }
-  // only when rounding errors occur
-  return weight.length - 1;
-}
+  (sentence_builder sentence_list 0 0);;
