@@ -31,6 +31,7 @@ let print_table table = Hashtbl.fold (fun k v acc -> (k, v) :: acc) table [];;
 (* Char values - \32 -> \255 *)
 
 let testthing = "The Christmas Cottage, a biopic about the artist Thomas Kinkade, famous for the quaint-scary-ugly paintings he sells in shopping malls, is a cinematic portrait of the multimillionaire artist as a young man. Kinkade co-produced the movie, which went straight to DVD when it came out in 2008. In a pivotal scene, the budding “Painter of Light,” home from college, gathers with his mother and younger brother on Christmas morning.";;
+
 List.
 let stru = Str.full_split (Str.regexp "[\\.\\?\\!]+") testthing;;
 
@@ -61,3 +62,7 @@ let stru = Str.full_split (Str.regexp "[\\.\\?\\!]+") testthing;;
     | _ -> sentences
   in
   (sentence_builder sentence_list 0 0);;
+
+words "a good woman is proud of her daughter and a good daughter is proud of her mom";;
+
+String.make 1 '\'';;

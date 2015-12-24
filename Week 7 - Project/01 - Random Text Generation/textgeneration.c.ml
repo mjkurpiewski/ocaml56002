@@ -13,73 +13,64 @@ type ptable =
 
 let character_set = function
   | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '\128' .. '\255' -> `Char
-  | ';' | ',' | ':' | '-' | '"' | '\'' -> `Word
+  | ';' | ',' | ':' | '-' | '"' | '\'' -> `Word_char
   | '?' | '!' | '.' -> `Term
   | _ -> `Separator
 
-let is_character = function
-  | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '\128' .. '\255' -> true
-  | _ -> false;;
-
-let is_terminator = function
-  | '?' | '!' | '.' -> true
-  | _ -> false;;
-
-let is_special_char = function
-  | ';' | ',' | ':' | '-' | '"' | '\'' | '?' | '!' | '.' -> true
-  | _ -> false;;
-
 let words (str : string) : string list =
   let w_buffer = Buffer.create 16 in
+  let input_length = String.length str in
 
-  let rec aux (i : int) (acc : string list) : string list =
-    let to_add = Buffer.contents w_buffer in
+  let char_to_string (c : char) : string =
+    String.make 1 c
+  in
 
-    let empty_strp ?f:(f = fun x -> x) (str : string) =
-      if str <> "" then
-        f (to_add :: acc)
+  let rec wordlist_builder (acc : string list) (idx : int) =
+    if idx = input_length && Buffer.contents w_buffer <> "" then
+      (Buffer.contents w_buffer) :: acc
+    else if idx = input_length then
+      acc
+    else
+      let this_char = str.[idx] in
+      match (character_set this_char) with
+      | `Char -> (Buffer.add_char w_buffer this_char; wordlist_builder acc (idx + 1))
+      | `Term | `Word_char ->
+        (let word = Buffer.contents w_buffer in
+         Buffer.reset w_buffer;
+         wordlist_builder (char_to_string this_char :: word :: acc) (idx + 1))
+      | `Separator ->
+        (let word = Buffer.contents w_buffer in
+         Buffer.reset w_buffer;
+         if word <> "" then
+           wordlist_builder (word :: acc) (idx + 1)
+         else
+           wordlist_builder acc (idx + 1))
+  in
+  List.rev (wordlist_builder [] 0);;
+
+let sentences (str : string) : string list list =
+  let to_split = List.filter (fun x -> x <> "") (words str) in
+
+  let rec sentences_builder
+      (acc : string list list)
+      (current_sentence : string list)
+      (input_words : string list) =
+    match input_words with
+    | [] ->
+      if acc = [] then
+        ((List.rev current_sentence) :: acc)
       else
-        f acc
-    in
-
-    if i = String.length str then
-      empty_strp to_add
-    else
-      let char_at = str.[i] in
-      match char_at with
-      | c when is_character char_at -> (Buffer.add_char w_buffer c; aux (i + 1) acc)
-      | c when is_special_char char_at ->
-        (Buffer.clear w_buffer;
-        aux (i + 1) ((Char.escaped c) :: to_add :: acc))
+        acc
+    | hd :: [] -> sentences_builder (List.rev (hd :: current_sentence) :: acc) [] []
+    | hd :: tl ->
+      match hd with
+      | "!" | "." | "?" ->
+        let complete_sentence = List.rev (hd :: current_sentence) in
+        sentences_builder (complete_sentence :: acc) [] tl
       | _ ->
-        (Buffer.clear w_buffer;
-        empty_strp to_add ~f:(fun x -> aux (i + 1) x))
+        sentences_builder acc (hd :: current_sentence) tl
   in
-  List.rev (aux 0 []);;
-
-let sentences (str : string) : string list =
-  let sentence_list = [] in
-
-  let rec splitter (sentences : string list) (current_idx : int) (previous_idx : int) =
-    if String.length str = current_idx && previous_idx = 0 then
-      [str]
-    else
-      try
-        let char_at = str.[current_idx] in
-        match char_at with
-        | c when is_terminator char_at ->
-          splitter
-            ((String.sub str previous_idx (current_idx - previous_idx + 1)) :: sentences)
-            (current_idx + 1)
-            (current_idx + 1)
-        | c -> splitter
-                 sentences
-                 (current_idx + 1)
-                 previous_idx
-      with
-      | _ -> List.rev sentences
-  in
-  (splitter sentence_list 0 0);;
+  List.rev (sentences_builder [] [] to_split);;
 
 let compute_distribution (words : string list) : distribution =
   let freq_builder (acc : frequencies) (word : string) : frequencies =
