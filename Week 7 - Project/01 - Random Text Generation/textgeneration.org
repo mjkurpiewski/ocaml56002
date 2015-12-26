@@ -219,7 +219,8 @@ case we have [ "START" ; "START" ].
 *** type ptable =
 { prefix_length : int ;
   table : (string list, distribution) Hashtbl.t }
-** TODO sentences : string -> string list list
+** DONE sentences : string -> string list list
+CLOSED: [2015-12-23 Wed 22:58]
 'sentences' is a function that splits a string into a list of sub-sentences
 with rules such that
 *** Property I
@@ -234,20 +235,24 @@ These punctuation characters terminate sequences:
 *** Property IV
 Everything else is a separator
 *** let sentences str =
-** TODO start : int -> string list
+** DONE start : int -> string list
+CLOSED: [2015-12-23 Wed 23:07]
 This creates the start prefix for a given size.
 i.e. start 0 = [] ; start 1 = [ "START" ] ; start 2 = [ "START" ; "START" ]
 *** let rec start lp =
-** TODO shift : string list -> string -> string list
+** DONE shift : string list -> string -> string list
+CLOSED: [2015-12-23 Wed 23:18]
 This removes the front element of the list and puts the new element at the
 ending.
 i.e. shift [ "A" ; "B" ; "C" ] "D" = [ "B" ; "C" ; "D" ] or
      shift [ "B" ; "C" ; "D" ] "E" = [ "C" ; "D" ; "E" ]
 *** let shift l x =
-** TODO build_ptable : string list -> int -> ptable
+** DONE build_ptable : string list -> int -> ptable
+CLOSED: [2015-12-26 Sat 17:44]
 Builds a table for a given prefix length using the two previous functions.
 *** let build_ptable words lp =
-** TODO walk_ptable : ptable -> string list
+** DONE walk_ptable : ptable -> string list
+CLOSED: [2015-12-26 Sat 18:20]
 'walk_ptable' will generate a sentence from a given 'ptable'. Unless you write
 specific annotations, 'next_in_htable' should be polymorphic enough to work on
 the field 'table' of a 'ptable', so you can reuse this. If you want, since we

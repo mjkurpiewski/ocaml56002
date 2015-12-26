@@ -9,6 +9,9 @@ type distribution =
 
 type htable = (string, distribution) Hashtbl.t;;
 
+let print_table (table : htable) =
+  Hashtbl.fold (fun k v acc -> (k, v) :: acc) table [];;
+
 let words (str : string) : string list =
   let w_buffer = Buffer.create 16 in
   let rec aux (i : int) (acc : string list) : string list =
@@ -48,9 +51,11 @@ let build_htable (words : string list) =
 
       if Hashtbl.mem interim_table hd then
         let values = Hashtbl.find interim_table hd in
-        (Hashtbl.replace interim_table hd ("STOP" :: values); local_builder ())
+        (Hashtbl.replace interim_table hd ("STOP" :: values);
+         local_builder ())
       else
-        (Hashtbl.add interim_table hd ["STOP"]; local_builder ())
+        (Hashtbl.add interim_table hd ["STOP"];
+         local_builder ())
 
     | hd :: nx :: tl ->
       let local_builder = (fun _ -> interim_builder (nx :: tl) interim_table) in
