@@ -7,9 +7,11 @@ type distribution =
   { total : int;
     amounts : frequencies };;
 
+type ptable_values = (string list, distribution) Hashtbl.t;;
+
 type ptable =
   { prefix_length : int;
-    table : (string list, distribution) Hashtbl.t }
+    table : ptable_values};;
 
 let character_set = function
   | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '\128' .. '\255' -> `Char
@@ -163,11 +165,12 @@ let build_ptable (words : string list) (prefix_size : int) =
 
   {prefix_length = prefix_size; table = final_hash};;
 
-let next_in_ptable corpus (prefix : string list) : string =
+let next_in_ptable (corpus : ptable_values) (prefix : string list) : string =
+  let random_float = Random.float 1.0 in
+
   let word_distribtuion = Hashtbl.find corpus prefix in
   let total_weight = word_distribtuion.total in
   let candidates = word_distribtuion.amounts in
-  let random_float = Random.float 1.0 in
 
   let rec aux (candidates : frequencies) (placeholder : float) : string =
     match candidates with
@@ -187,14 +190,17 @@ let next_in_ptable corpus (prefix : string list) : string =
   in
   aux candidates 0.0;;
 
-let walk_ptable { table ; prefix_length = prefix_size } : string list =
+let walk_ptable { table = corpus ; prefix_length = prefix_size } : string list =
   let rec walk_helper
       (sentence : string list)
       (current_prefix : string list) =
-    let next_word = next_in_ptable table current_prefix in
+    let next_word = next_in_ptable corpus current_prefix in
     if next_word = "STOP" then
       List.rev sentence
     else
       walk_helper (next_word :: sentence) (shift current_prefix next_word)
   in
   walk_helper [] (start prefix_size);;
+
+let merge_ptables (tl : ptable list) =
+  List.fold_left (fun truth value -> )
