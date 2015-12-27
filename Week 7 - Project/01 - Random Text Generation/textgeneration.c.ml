@@ -1,17 +1,35 @@
 open Buffer;;
 open Hashtbl;;
 
-type frequencies = (string * int) list;;
+exception Prefix_mismatch;;
 
 type distribution =
   { total : int;
-    amounts : frequencies };;
-
-type ptable_values = (string list, distribution) Hashtbl.t;;
+    amounts : (string * int) list};;
 
 type ptable =
   { prefix_length : int;
-    table : ptable_values};;
+    table : (string list, distribution) Hashtbl.t};;
+
+let merge_distributions
+    (distribution1 : distribution)
+    (distribution2 : distribution) =
+
+  let rec frequency_merger
+      (shorter : (string * int) list)
+      (longer : (string * int) list) : (string * int) list =
+    match shorter with
+    | [] -> longer
+    | (name, freq) :: tl ->
+      if List.mem_assoc name longer then
+        let longer_freq = List.assoc name longer in
+        frequency_merger tl ((name, freq + longer_freq) :: (List.remove_assoc name longer))
+      else
+        frequency_merger tl ((name, freq) :: longer)
+  in
+
+  {total = distribution1.total + distribution2.total;
+   amounts = frequency_merger distribution1.amounts distribution2.amounts};;
 
 let character_set = function
   | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '\128' .. '\255' -> `Char
@@ -79,7 +97,7 @@ let sentences (str : string) : string list list =
   List.rev (sentences_builder [] [] to_split);;
 
 let compute_distribution (words : string list) : distribution =
-  let freq_builder (acc : frequencies) (word : string) : frequencies =
+  let freq_builder acc (word : string) =
     try
       let word_freq = List.assoc word acc in
       (word, word_freq + 1) :: (List.remove_assoc word acc)
@@ -165,14 +183,14 @@ let build_ptable (words : string list) (prefix_size : int) =
 
   {prefix_length = prefix_size; table = final_hash};;
 
-let next_in_ptable (corpus : ptable_values) (prefix : string list) : string =
+let next_in_ptable corpus (prefix : string list) : string =
   let random_float = Random.float 1.0 in
 
   let word_distribtuion = Hashtbl.find corpus prefix in
   let total_weight = word_distribtuion.total in
   let candidates = word_distribtuion.amounts in
 
-  let rec aux (candidates : frequencies) (placeholder : float) : string =
+  let rec aux candidates (placeholder : float) : string =
     match candidates with
     | [] -> ""
     | (word, occur) :: [] -> word
@@ -202,5 +220,25 @@ let walk_ptable { table = corpus ; prefix_length = prefix_size } : string list =
   in
   walk_helper [] (start prefix_size);;
 
-let merge_ptables (tl : ptable list) =
-  List.fold_left (fun truth value -> )
+let merge_ptables (ptables : ptable list) : ptable =
+  let merged_table = List.hd ptables in
+
+  let rec table_walker (merging : ptable) (to_merge : ptable list) : ptable =
+    match to_merge with
+    | [] -> merging
+    | hd :: tl ->
+      let next_table = hd in
+      if next_table.prefix_length <> merging.prefix_length then
+        raise Prefix_mismatch
+      else
+        Hashtbl.iter
+          (fun x y ->
+             if Hashtbl.mem merging.table x then
+               let old_y = Hashtbl.find merging.table x in
+               Hashtbl.replace merging.table x (merge_distributions y old_y)
+             else
+               Hashtbl.add merging.table x y)
+        next_table.table;
+      table_walker merging tl
+  in
+  table_walker merged_table (List.tl ptables);;

@@ -67,6 +67,35 @@ words "a good woman is proud of her daughter and a good daughter is proud of her
 
 String.make 1 '\'';;
 
-let corp = "The Christmas Cottage, a biopic about the artist Thomas Kinkade, famous for the quaint-scary-ugly paintings he sells in shopping malls, is a cinematic portrait of the multimillionaire artist as a young man. Kinkade co-produced the movie, which went straight to DVD when it came out in 2008. In a pivotal scene, the budding “Painter of Light,” home from college, gathers with his mother and younger brother on Christmas morning.
-It’s the mid-Seventies in Placerville, California, a small town in the foothills of the Sierra Nevada. The Kinkades are a poor family living in a rundown house. Kinkade’s mother, divorced from his father, has lost her job, and because she is generous to other people in the town—“she loaned people money, she gave people things”—and because she refuses assistance from anyone else, the Kinkades are about to lose what they call “the cottage.” The bank is foreclosing; they’ve only got a few days left to pay.
-Young Thom—the grown-up artist spells the short version of his name that way—and his brother have been working hard to raise money for their mother’s overdue mortgage payment, but they haven’t put together enough cash. They can’t save the house, so understandably they don’t have store-bought Christmas gifts to exchange. Instead, Thom (Jared Padalecki, from Gilmore Girls) presents his mother (Marcia Gay Harden) with a picture of their house he’s drawn himself, so she’ll always have something by which to remember what they’re about to lose.";;
+let s1 = "The Christmas Cottage, a biopic about the artist Thomas Kinkade, famous for the quaint-scary-ugly paintings he sells in shopping malls, is a cinematic portrait of the multimillionaire artist as a young man. Kinkade co-produced the movie, which went straight to DVD when it came out in 2008. In a pivotal scene, the budding “Painter of Light,” home from college, gathers with his mother and younger brother on Christmas morning.";;
+
+let s2 = "It’s the mid-Seventies in Placerville, California, a small town in the foothills of the Sierra Nevada. The Kinkades are a poor family living in a rundown house. Kinkade’s mother, divorced from his father, has lost her job, and because she is generous to other people in the town—“she loaned people money, she gave people things”—and because she refuses assistance from anyone else, the Kinkades are about to lose what they call “the cottage.” The bank is foreclosing; they’ve only got a few days left to pay";;
+
+let s3 = "Young Thom—the grown-up artist spells the short version of his name that way—and his brother have been working hard to raise money for their mother’s overdue mortgage payment, but they haven’t put together enough cash. They can’t save the house, so understandably they don’t have store-bought Christmas gifts to exchange. Instead, Thom (Jared Padalecki, from Gilmore Girls) presents his mother (Marcia Gay Harden) with a picture of their house he’s drawn himself, so she’ll always have something by which to remember what they’re about to lose.";;
+
+let testmerge =
+  let table1 = build_ptable (words s1) 2 in
+  let table2 = build_ptable (words s2) 2 in
+  let table3 = build_ptable (words s3) 2 in
+
+  merge_ptables [table1; table2; table3];;
+
+
+merge_distributions {total = 3; amounts = [("no", 1); ("a", 2)]} {total = 5; amounts = [("the", 1); ("a", 4)]};;
+
+
+  let d1freqs = distribution1.amounts in
+  let d2freqs = distribution2.amounts in
+
+  let rec frequency_merger shorter longer =
+    match shorter with
+    | [] -> longer
+    | hd :: tl ->
+      match hd with
+      | (name, freq) ->
+        if List.exists (fun x -> x = name) longer then
+          let longer_entry = List.assoc name longer in
+
+
+  {total = distribution1.total + distribution2.total;
+   amounts = };;
