@@ -1,0 +1,63 @@
+* Tries
+A trie is a data structure used to represent dictionaries whose keys are
+strings. This is noticably space-efficient and very fast at lookups.
+
+We define a trie with two mutually defined types, as follows:
+** A Trie
+*** type trie = Trie of int option * char_to_children
+This represents a tree whose root MAY contain an integer value,
+hence the use of 'int option', and whose children are indexed by
+characters.
+*** and char_to_children = (char * trie) list
+This is the associative data structure whose keys are single characters and
+whose children are tries themselves. As a note, a hash table may provide
+better performance for this kind of data structure.
+** DONE children_from_char : char_to_children -> char -> trie option
+CLOSED: [2015-12-29 Tue 19:13]
+Such that...
+*** children_from_char m c = Some t
+If there exists a pair (c, t), the first pair in 'm', with 'c' as a component.
+*** children_from_char m c = None
+If no pair indexed by 'c' exists in 'm'.
+** DONE update_children : char_to_children -> char -> trie -> char_to_children
+CLOSED: [2015-12-29 Tue 19:24]
+Such that...
+*** children_from_char (update_children m c t) c =
+Some t
+*** children_from_char (update_children m c t) c' =
+children_from_char m c' where c <> c'
+*** children_from_char m c = Some t
+... then List.length (update_children m c t') = List.length m
+** DONE lookup : trie -> string -> int option
+CLOSED: [2015-12-29 Tue 19:49]
+Such that 'lookup trie w = Some i' if there exists a key 'w' in the trie and
+there is a value 'i' associated with it to return. We return 'None' if 'w'
+is not a key in 'trie'.
+
+To look for a key in a trie, we iterate over the characters from left-to-right.
+Given a current character, 'c', and the current node in the tree 'n', we lookup
+the children 'n' for the character 'c'. If it exists, continue, otherwise, it
+does not exist in the trie and we return 'None'.
+** TODO insert : trie -> string -> int -> trie
+Such that...
+*** lookup (insert trie w k) w = Some k
+*** lookup (insert trie w k) w' = lookup trie w' for w <> w'
+* The given prelude
+type trie = Trie of int option * char_to_children
+and char_to_children = (char * trie) list
+
+let empty =
+  Trie (None, [])
+
+let example =
+  Trie (None,
+  [('i', Trie (Some 11,
+                     [('n', Trie (Some 5, [('n', Trie (Some 9, []))]))]));
+   ('t',
+    Trie (None,
+    [('e',
+      Trie (None,
+      [('n', Trie (Some 12, [])); ('d', Trie (Some 4, []));
+       ('a', Trie (Some 3, []))]));
+     ('o', Trie (Some 7, []))]));
+   ('A', Trie (Some 15, []))])

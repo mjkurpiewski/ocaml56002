@@ -1,0 +1,51 @@
+* A Solver for Klotski
+In this project, we will develop a solver for sliding block puzzle games, like
+Klotski, using graph theoretical techniques to explore a solution space
+efficiently.
+** Klotski Board
+*** Board Dimensions: 5 units tall, 4 units wide
+*** Piece 'S' - 2x2 square
+*** Piece 'H' - 2x1 horizontal rectangle
+*** Pcs. "V0 .. V3" - 1x2 vertical rectangle
+*** Pcs. "C0 .. C3" - 1x1 square
+*** Initial configuration
+| V0 | S  | S  | V1 |
+| V0 | S  | S  | V1 |
+| V2 | H  | H  | V3 |
+| V2 | C0 | C1 | V3 |
+| C2 |    |    | C3 |
+
+** Gameplay
+A move consists of sliding one piece at a time, and the victory condition is
+moving the large square piece 'S' to the bottom. We describe the solution
+space of a Klotski game as a graph where each node is the result of performing
+a valid move that yields a new board. This graph is directional, so we may
+inadvertently traverse paths that we have already searched for the solution.
+As a result, we need to keep track of paths we've taken.
+** Approach
+This is laid out as a two step process:
+*** Generic Solver
+This generic solver algorithm will be able to solve any problem whose search
+space can be represented by a graph, while being mindful of loops and
+directionality of the graph.
+*** Klotski Puzzle
+We describe the actual Klotski puzzle search space as a graph to pass to our
+generic solver.
+** DONE Preliminary Functions
+CLOSED: [2015-12-30 Wed 18:51]
+*** DONE loop : ('a -> bool) -> ('a -> 'a) -> 'a -> 'a
+CLOSED: [2015-12-30 Wed 18:51]
+Such that
+'loop p f x = x' if 'p x = true' and
+'loop p f x = loop p f (f x)' otherwise.
+*** DONE exists : ('a -> bool) -> 'a list -> bool
+CLOSED: [2015-12-30 Wed 18:51]
+Such that
+'exists p l = true' iff there exists an element 'x' of 'l' such that
+'p x = true'
+*** DONE find : ('a -> bool) -> 'a list -> 'a
+CLOSED: [2015-12-30 Wed 18:51]
+Such that
+'find p l = x' if 'x' is the first element of 'l' for which 'p x = true'.
+If no such element exists, 'find' will raise the given exception 'NotFound'.
+** Part A: A Generic Problem Solver
