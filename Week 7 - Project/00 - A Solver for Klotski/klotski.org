@@ -13,7 +13,7 @@ efficiently.
 | V0 | S  | S  | V1 |
 | V2 | H  | H  | V3 |
 | V2 | C0 | C1 | V3 |
-| C2 |    |    | C3 |
+| C2 | X  | X  | C3 |
 
 ** Gameplay
 A move consists of sliding one piece at a time, and the victory condition is
@@ -48,4 +48,70 @@ CLOSED: [2015-12-30 Wed 18:51]
 Such that
 'find p l = x' if 'x' is the first element of 'l' for which 'p x = true'.
 If no such element exists, 'find' will raise the given exception 'NotFound'.
-** Part A: A Generic Problem Solver
+** TODO Part A: A Generic Problem Solver
+Using graph exploration, we will create a naive problem solver that will be
+refined, step by step, as the project progresses.
+
+We can consider problem solving through the lens of having a set, Ε, that
+represents the states of the problem, as well as a finite binary relation,
+ℜ, that represents the steps from one state to another.
+
+Keep in mind that a binary relation is a subset of all the pairs that exist
+in Ε. We write 'xℜy' if (x, y) is is in 'ℜ'. This relation can be viewed
+through an image function from Ε to the subsets of Ε. Therefore, this type
+definition holds for binary relations:
+
+'type \epsilon rel = \epsilon -> \epsilon list'
+
+In practice, the type '\epsilon rel' describes a function which, when given a
+configuration of the problem, gives all the possible configurations that
+may occur after taking the step. Now we broaden our view from a single
+configuration to a set of configurations.
+*** DONE near : int -> rel
+CLOSED: [2015-12-31 Thu 17:26]
+For this, we will define a relation   $\begin{math} \mathit{xNy} \end{math}$ that tells if the difference between
+two integers is 'at most' two. For instance, $\begin{math} \mathit{1N3} \end{math}$; $\begin{math} \mathit{3N1} \end{math}$;$\begin{math} \mathit{2N2} \end{math}$ are valid,
+while $\begin{math} \mathit{1N4} \end{math}$ or $\begin{math} \mathit{5N0} \end{math}$ is not.
+
+'near 2' should return something akin to [0;1;2;3;4].
+*** DONE flatmap : \epsilon rel \rightarrow (\epsilon list \rightarrow \epsilon list)
+CLOSED: [2016-01-02 Sat 18:18]
+Such that callling 'flatmap r' will represent $\begin{math}
+\bar{\mathcal.{R}}
+\end{math}$ if 'r' represents a binary relation $\begin{math}
+\mathcal{R}
+\end{math}$.
+For instance, applying 'flatmap' to 'near' to create a partial function, which
+is then given [2;3;4] as input, should yield a result that is a flattened list
+applying near to each element of the list given as input, i.e. 'flatmap near'
+on [2;3;4] places the results of 'near 2', 'near 3', and 'near 4' in a single
+list.
+
+Formally, we are extending the image function  $\begin{math}
+\mathcal{R}
+\end{math}$ of a binary relation $\begin{math}
+\mathcal{R}
+\end{math}$ over
+\Epsilon to a function $\begin{math}
+ \bar{\mathcal{R}}
+ \end{math}$ defined as follows.
+
+\begin{equation}
+{{\bar{\mathcal{R}}}([]) = [] \land {\bar{\mathcal{R}}}(x :: xs) = {\mathcal{R}}(x)@{\bar{\mathcal{R}}}(xs)}
+\end{equation}
+
+Simply, this computs the list of all possible new configurations that are
+reachable in one step from any configuration in the original list, losing
+track of the exact predecessor of each configuration. Inductively, we know
+that if there is a configuration in the current set, there must exist one
+in the original set that led to it in one step.
+*** TODO iterrel : \epsilon rel \rightarrow int \rightarrow \epsilon rel
+A binary relation over the set of problem configurations relates ALL pairs
+of configurations that are separated by one step. i.e., moving one piece in
+the game in one move. Sometimes, we may want to relate the configuration with
+its possible futures, as well.
+
+The gist of iterrel is to iterate some given relation n times, where n is an
+integer passed as input to the function, a value of '1' counts as the identity
+of the relation. For instance, 'iterrel near 2' should be the image function of
+the relation that tells if two integers are separated by 4 or less.
