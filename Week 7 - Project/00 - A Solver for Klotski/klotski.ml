@@ -67,22 +67,11 @@ let rec find (p : 'a -> bool) (l : 'a list) : 'a =
   | hd :: tl -> if p hd then hd else find p tl;;
 
 (* Part A: A Generic Problem Solver *)
-let rec near (x : int) : 'e rel =
-  let distance = 2 in
-
-  let rec builder (counter : int) (acc : 'e list) =
-    if List.length acc = (distance * 2) + 1 then
-      acc
-    else
-      builder (counter + 1) (counter :: acc)
-  in
-  List.rev (builder (x - distance) []);;
+let rec near : int rel =
+  fun x -> [x - 2; x - 1; x; x + 1; x + 2];;
 
 let flat_map (rel : 'e rel) : ('e list -> 'e list) =
-  (fun l ->
+  (fun (l : 'e list) ->
     List.flatten (List.map rel l));;
 
-let rec iter_rel (rel : 'e rel) (itr : int) : 'e rel =
-  if itr = 1 then
-    relation
-  else
+let iter_rel (rel : 'e rel) (itr : int) : 'e rel =

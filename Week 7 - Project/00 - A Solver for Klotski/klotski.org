@@ -67,7 +67,7 @@ In practice, the type '\epsilon rel' describes a function which, when given a
 configuration of the problem, gives all the possible configurations that
 may occur after taking the step. Now we broaden our view from a single
 configuration to a set of configurations.
-*** DONE near : int -> rel
+*** DONE near : int rel
 CLOSED: [2015-12-31 Thu 17:26]
 For this, we will define a relation   $\begin{math} \mathit{xNy} \end{math}$ that tells if the difference between
 two integers is 'at most' two. For instance, $\begin{math} \mathit{1N3} \end{math}$; $\begin{math} \mathit{3N1} \end{math}$;$\begin{math} \mathit{2N2} \end{math}$ are valid,
